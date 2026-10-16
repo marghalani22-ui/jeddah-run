@@ -34,7 +34,7 @@ jobs:
         run: |
           M=android/app/src/main/AndroidManifest.xml
           sed -i 's/android:label="jeddah_run"/android:label="جري جدة"/' $M
-          sed -i 's#<application#<uses-permission android:name="android.permission.INTERNET"/>\n    <application#' $M
+          sed -i 's#<application#<uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.VIBRATE"/>\n    <application#' $M
 
       - run: flutter pub get
       # Failures are echoed as annotations so they can be read via the API.
