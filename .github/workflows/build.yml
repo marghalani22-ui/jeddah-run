@@ -34,11 +34,14 @@ jobs:
           sed -i 's#<application#<uses-permission android:name="android.permission.INTERNET"/>\n    <application#' $M
 
       - run: flutter pub get
-      - run: flutter analyze --no-fatal-infos
-      - run: flutter test
+      # Failures are echoed as annotations so they can be read via the API.
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos > out.txt 2>&1 || { grep -E "error|warning" out.txt | head -40 | sed 's/^/::error::/'; exit 1; }
+      - name: Test
+        run: flutter test > out.txt 2>&1 || { tail -40 out.txt | sed 's/^/::error::/'; exit 1; }
 
       - name: Build APK
-        run: flutter build apk --release
+        run: flutter build apk --release > out.txt 2>&1 || { grep -iE "error|exception|failed" out.txt | head -40 | sed 's/^/::error::/'; exit 1; }
 
       - uses: actions/upload-artifact@v4
         with:

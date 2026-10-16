@@ -87,14 +87,14 @@ class _LogScreenState extends State<LogScreen> {
         const SectionHead('آخر الجولات'),
         Card(
           child: Column(children: [
-            for (final (name, when, km, t, pace) in Demo.runs)
+            for (final (name, day, km, t, pace) in Demo.runs)
               ListTile(
                 leading: CircleAvatar(
                   backgroundColor: p.sand2,
                   child: const Icon(Icons.route, color: Brand.coral, size: 20),
                 ),
                 title: Text(name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14.5)),
-                subtitle: Text(when, style: TextStyle(color: p.muted, fontSize: 12.5)),
+                subtitle: Text(day, style: TextStyle(color: p.muted, fontSize: 12.5)),
                 trailing: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.end,
