@@ -1,34 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
-/// Phase 1: the approved prototype (assets/web/index.html) runs inside a
-/// native shell, so the app looks exactly like the design. Native features
-/// (real map, GPS, notifications, widget) are bridged in step by step.
-void main() {
+import 'screens/log_screen.dart';
+import 'screens/map_screen.dart';
+import 'screens/profile_screen.dart';
+import 'screens/shop_screen.dart';
+import 'state/runs.dart';
+import 'state/settings.dart';
+import 'theme/app_theme.dart';
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: _bg,
-    statusBarIconBrightness: Brightness.light,
-    systemNavigationBarColor: _bg,
-    systemNavigationBarIconBrightness: Brightness.light,
-  ));
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  await Future.wait([settings.load(), runStore.load()]);
   runApp(const JeddahRunApp());
 }
-
-const _bg = Color(0xFF0B3B4F);
 
 class JeddahRunApp extends StatelessWidget {
   const JeddahRunApp({super.key});
 
   @override
-  Widget build(BuildContext context) => const MaterialApp(
-        title: 'جري جدة',
-        debugShowCheckedModeBanner: false,
-        home: Shell(),
+  Widget build(BuildContext context) => ListenableBuilder(
+        listenable: settings,
+        builder: (context, _) => MaterialApp(
+          title: 'جري جدة',
+          debugShowCheckedModeBanner: false,
+          locale: const Locale('ar'),
+          supportedLocales: const [Locale('ar')],
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          theme: buildTheme(Brightness.light),
+          darkTheme: buildTheme(Brightness.dark),
+          themeMode: settings.themeMode,
+          home: const Shell(),
+        ),
       );
 }
 
@@ -40,61 +49,23 @@ class Shell extends StatefulWidget {
 }
 
 class _ShellState extends State<Shell> {
-  late final WebViewController _web;
-  bool _ready = false;
+  int _i = 0;
+
+  // The map tab stays alive; the other tabs are light and rebuild on demand.
+  static const _pages = [MapScreen(), LogScreen(), ShopScreen(), ProfileScreen()];
 
   @override
-  void initState() {
-    super.initState();
-    _web = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(_bg)
-      ..setNavigationDelegate(NavigationDelegate(
-        onPageFinished: (_) => setState(() => _ready = true),
-      ))
-      ..loadFlutterAsset('assets/web/index.html');
-
-    final android = _web.platform;
-    if (android is AndroidWebViewController) {
-      // Lets the profile "add photo" button open the gallery.
-      android.setOnShowFileSelector(_pickFile);
-      android.setMediaPlaybackRequiresUserGesture(false);
-    }
-  }
-
-  Future<List<String>> _pickFile(FileSelectorParams params) async {
-    final img = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 1024, imageQuality: 88);
-    return img == null ? [] : [Uri.file(img.path).toString()];
-  }
-
-  Future<void> _back() async {
-    if (await _web.canGoBack()) {
-      await _web.goBack();
-    } else {
-      await SystemNavigator.pop();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _back();
-      },
-      child: Scaffold(
-        backgroundColor: _bg,
-        body: SafeArea(
-          child: Stack(children: [
-            WebViewWidget(controller: _web),
-            if (!_ready)
-              const ColoredBox(
-                color: _bg,
-                child: Center(child: CircularProgressIndicator(color: Color(0xFFF25C2C))),
-              ),
-          ]),
+  Widget build(BuildContext context) => Scaffold(
+        body: IndexedStack(index: _i, children: _pages),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _i,
+          onDestinationSelected: (v) => setState(() => _i = v),
+          destinations: const [
+            NavigationDestination(icon: Icon(Icons.map_outlined), selectedIcon: Icon(Icons.map), label: 'الخريطة'),
+            NavigationDestination(icon: Icon(Icons.bar_chart_outlined), selectedIcon: Icon(Icons.bar_chart), label: 'سجلّي'),
+            NavigationDestination(icon: Icon(Icons.storefront_outlined), selectedIcon: Icon(Icons.storefront), label: 'المتجر'),
+            NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'ملفي'),
+          ],
         ),
-      ),
-    );
-  }
+      );
 }

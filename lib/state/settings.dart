@@ -6,21 +6,34 @@ enum Look { day, night, auto }
 
 class Settings extends ChangeNotifier {
   Look look = Look.auto;
-
-  static const _k = 'look';
+  String name = '';
+  int goalKm = 20;
 
   Future<void> load() async {
     final sp = await SharedPreferences.getInstance();
-    final v = sp.getString(_k);
+    final v = sp.getString('look');
     look = Look.values.firstWhere((e) => e.name == v, orElse: () => Look.auto);
+    name = sp.getString('name') ?? '';
+    goalKm = sp.getInt('goalKm') ?? 20;
     notifyListeners();
   }
 
   Future<void> setLook(Look v) async {
     look = v;
     notifyListeners();
-    final sp = await SharedPreferences.getInstance();
-    await sp.setString(_k, v.name);
+    (await SharedPreferences.getInstance()).setString('look', v.name);
+  }
+
+  Future<void> setName(String v) async {
+    name = v.trim();
+    notifyListeners();
+    (await SharedPreferences.getInstance()).setString('name', name);
+  }
+
+  Future<void> setGoal(int v) async {
+    goalKm = v;
+    notifyListeners();
+    (await SharedPreferences.getInstance()).setInt('goalKm', v);
   }
 
   /// Auto = light between roughly sunrise and sunset in Jeddah (UTC+3).
