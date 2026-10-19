@@ -25,4 +25,12 @@ void main() {
     expect(back.meters, 5000);
     expect(back.path.length, 2);
   });
+
+  test('anti-cheat', () {
+    expect(checkRun(meters: 5000, secs: 1800, rejected: 0, accepted: 200), isNull);
+    expect(checkRun(meters: 5000, secs: 500, rejected: 0, accepted: 200), isNotNull);
+    expect(checkRun(meters: 3000, secs: 1200, rejected: 80, accepted: 100), isNotNull);
+    final flagged = Run(start: DateTime(2026), secs: 500, meters: 5000, path: const [], flag: 'x');
+    expect(flagged.points, 0);
+  });
 }

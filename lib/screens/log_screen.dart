@@ -96,7 +96,7 @@ class _RunTile extends StatelessWidget {
     return ListTile(
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => SummaryScreen(run: r))),
                 leading: CircleAvatar(backgroundColor: p.sand2, child: const Icon(Icons.route, color: Brand.coral, size: 20)),
-                title: Text(runTitle(r.start), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14.5)),
+                title: Text(r.title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14.5)),
                 subtitle: Text(fmtWhen(r.start), style: TextStyle(color: p.muted, fontSize: 12.5)),
                 trailing: Column(
                   mainAxisAlignment: MainAxisAlignment.center,

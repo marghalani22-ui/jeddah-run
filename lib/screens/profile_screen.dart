@@ -72,6 +72,29 @@ class ProfileScreen extends StatelessWidget {
               ),
             ]),
             Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              const SectionHead('أثناء الجري'),
+              Card(
+                clipBehavior: Clip.antiAlias,
+                child: Column(children: [
+                  SwitchListTile(
+                    value: settings.voice,
+                    onChanged: settings.setVoice,
+                    activeTrackColor: Brand.coral,
+                    title: const Text('التنبيه الصوتي'),
+                    subtitle: Text('يقولك الزمن والسرعة كل كيلو', style: TextStyle(color: p.muted, fontSize: 12.5)),
+                  ),
+                  const Divider(indent: 16, endIndent: 16),
+                  SwitchListTile(
+                    value: settings.autoPause,
+                    onChanged: settings.setAutoPause,
+                    activeTrackColor: Brand.coral,
+                    title: const Text('إيقاف تلقائي'),
+                    subtitle: Text('يوقف الوقت لما توقف عند إشارة ويكمّل لما تتحرك', style: TextStyle(color: p.muted, fontSize: 12.5)),
+                  ),
+                ]),
+              ),
+            ]),
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               const SectionHead('المظهر'),
               SegmentedButton<Look>(
                 segments: const [

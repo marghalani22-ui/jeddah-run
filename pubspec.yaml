@@ -1,7 +1,7 @@
 name: jeddah_run
 description: "جري جدة — تطبيق جري بطابع لعبة"
 publish_to: 'none'
-version: 0.3.0+3
+version: 0.4.0+4
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
@@ -16,6 +16,7 @@ dependencies:
   maplibre_gl: ^0.22.0
   geolocator: ^14.0.0
   wakelock_plus: ^1.2.8
+  flutter_tts: ^4.2.0
 
 dev_dependencies:
   flutter_test:

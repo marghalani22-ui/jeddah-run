@@ -8,6 +8,7 @@ class Settings extends ChangeNotifier {
   Look look = Look.auto;
   String name = '';
   int goalKm = 20;
+  bool voice = true, autoPause = true;
 
   Future<void> load() async {
     final sp = await SharedPreferences.getInstance();
@@ -15,6 +16,8 @@ class Settings extends ChangeNotifier {
     look = Look.values.firstWhere((e) => e.name == v, orElse: () => Look.auto);
     name = sp.getString('name') ?? '';
     goalKm = sp.getInt('goalKm') ?? 20;
+    voice = sp.getBool('voice') ?? true;
+    autoPause = sp.getBool('autoPause') ?? true;
     notifyListeners();
   }
 
@@ -34,6 +37,18 @@ class Settings extends ChangeNotifier {
     goalKm = v;
     notifyListeners();
     (await SharedPreferences.getInstance()).setInt('goalKm', v);
+  }
+
+  Future<void> setVoice(bool v) async {
+    voice = v;
+    notifyListeners();
+    (await SharedPreferences.getInstance()).setBool('voice', v);
+  }
+
+  Future<void> setAutoPause(bool v) async {
+    autoPause = v;
+    notifyListeners();
+    (await SharedPreferences.getInstance()).setBool('autoPause', v);
   }
 
   /// Auto = light between roughly sunrise and sunset in Jeddah (UTC+3).

@@ -7,12 +7,15 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../services/location.dart';
+import '../services/voice.dart';
 import '../state/runs.dart';
+import '../state/settings.dart';
 import '../theme/tokens.dart';
 import '../widgets/jmap.dart';
 import 'summary_screen.dart';
 
-/// Live run: GPS-tracked distance, time and pace with the route drawn on the map.
+/// Live run: countdown, GPS-tracked distance/time/pace, auto-pause,
+/// per-km splits with spoken cues, and the route drawn on the map.
 class RunScreen extends StatefulWidget {
   const RunScreen({super.key});
 
@@ -20,58 +23,126 @@ class RunScreen extends StatefulWidget {
   State<RunScreen> createState() => _RunScreenState();
 }
 
+enum _Phase { countdown, running, paused, autoPaused }
+
 class _RunScreenState extends State<RunScreen> {
-  // Readings worse than this are ignored; jumps faster than this are GPS noise.
+  // Readings worse than this are ignored; jumps faster than this are GPS noise or a vehicle.
   static const _maxAccuracy = 25.0, _maxSpeed = 8.0, _minStep = 2.0;
+  // Auto-pause after this long without movement; resume above this speed.
+  static const _stillFor = Duration(seconds: 8), _resumeSpeed = 1.2;
 
   final _sw = Stopwatch();
   final _pts = <LatLng>[];
-  final DateTime _startedAt = DateTime.now();
+  final _splits = <int>[];
+  final _voice = Voice();
+  late final DateTime _startedAt;
   StreamSubscription<Position>? _sub;
   Timer? _tick;
   Position? _last;
+  DateTime _lastMove = DateTime.now();
   double _meters = 0, _accuracy = 999;
-  bool _paused = false, _drawing = false;
+  int _count = 3, _accepted = 0, _rejected = 0, _splitAt = 0;
+  _Phase _phase = _Phase.countdown;
+  bool _drawing = false;
   MapLibreMapController? _map;
   Line? _line;
+
+  bool get _moving => _phase == _Phase.running;
 
   @override
   void initState() {
     super.initState();
     WakelockPlus.enable();
-    _sw.start();
-    _tick = Timer.periodic(const Duration(seconds: 1), (_) => setState(() {}));
+    _voice.init();
+    // GPS warms up during the countdown.
     _sub = Geolocator.getPositionStream(locationSettings: runSettings()).listen(_onPos);
+    _tick = Timer.periodic(const Duration(seconds: 1), (_) => _onTick());
   }
 
   @override
   void dispose() {
     _sub?.cancel();
     _tick?.cancel();
+    _voice.stop();
     WakelockPlus.disable();
     super.dispose();
   }
 
-  void _onPos(Position p) {
-    _accuracy = p.accuracy;
-    if (_paused || p.accuracy > _maxAccuracy) {
-      if (mounted) setState(() {});
+  void _onTick() {
+    if (!mounted) return;
+    if (_phase == _Phase.countdown) {
+      HapticFeedback.heavyImpact();
+      if (_count > 1) {
+        setState(() => _count--);
+      } else {
+        _startedAt = DateTime.now();
+        _lastMove = _startedAt;
+        _sw.start();
+        _voice.say('يلا بدأنا');
+        setState(() => _phase = _Phase.running);
+      }
       return;
     }
+    if (_moving && settings.autoPause && DateTime.now().difference(_lastMove) > _stillFor) {
+      _sw.stop();
+      _phase = _Phase.autoPaused;
+      HapticFeedback.mediumImpact();
+    }
+    setState(() {});
+  }
+
+  void _onPos(Position p) {
+    _accuracy = p.accuracy;
+    if (!mounted) return;
+    if (_phase == _Phase.countdown || _phase == _Phase.paused || p.accuracy > _maxAccuracy) {
+      setState(() {});
+      return;
+    }
+
+    // Wake from auto-pause once the runner is clearly moving again.
+    // Some phones report speed as 0, so moving 10 m away also counts.
+    if (_phase == _Phase.autoPaused) {
+      final l = _last;
+      final away = l == null ? 99.0 : Geolocator.distanceBetween(l.latitude, l.longitude, p.latitude, p.longitude);
+      if (p.speed < _resumeSpeed && away < 10) return;
+      _phase = _Phase.running;
+      _sw.start();
+      HapticFeedback.mediumImpact();
+    }
+
     final here = LatLng(p.latitude, p.longitude);
     final last = _last;
     if (last != null) {
       final d = Geolocator.distanceBetween(last.latitude, last.longitude, p.latitude, p.longitude);
       final dt = p.timestamp.difference(last.timestamp).inMilliseconds / 1000;
       if (d < _minStep) return;
-      if (dt > 0 && d / dt > _maxSpeed) return;
+      if (dt > 0 && d / dt > _maxSpeed) {
+        _rejected++;
+        return;
+      }
+      _accepted++;
       _meters += d;
+      _lastMove = DateTime.now();
+      _checkSplit();
+    } else {
+      _lastMove = DateTime.now();
     }
     _last = p;
     _pts.add(here);
     _draw();
     _map?.animateCamera(CameraUpdate.newLatLng(here));
-    if (mounted) setState(() {});
+    setState(() {});
+  }
+
+  void _checkSplit() {
+    final km = (_meters / 1000).floor();
+    if (km <= _splits.length) return;
+    final now = _sw.elapsed.inSeconds;
+    final split = now - _splitAt;
+    _splitAt = now;
+    _splits.add(split);
+    HapticFeedback.heavyImpact();
+    _voice.say('كيلو $km. الزمن ${spokenDur(now)}. سرعة الكيلو ${spokenDur(split)}');
   }
 
   Future<void> _draw() async {
@@ -93,17 +164,25 @@ class _RunScreenState extends State<RunScreen> {
   void _togglePause() {
     HapticFeedback.mediumImpact();
     setState(() {
-      _paused = !_paused;
-      if (_paused) {
-        _sw.stop();
-      } else {
+      if (_phase == _Phase.paused) {
+        _phase = _Phase.running;
         _sw.start();
         _last = null; // don't bridge the gap walked while paused
+        _lastMove = DateTime.now();
+        _voice.say('كمّلنا');
+      } else {
+        _phase = _Phase.paused;
+        _sw.stop();
+        _voice.say('توقف مؤقت');
       }
     });
   }
 
   Future<void> _finish() async {
+    if (_phase == _Phase.countdown) {
+      Navigator.pop(context);
+      return;
+    }
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
@@ -126,13 +205,17 @@ class _RunScreenState extends State<RunScreen> {
       if (mounted) Navigator.pop(context);
       return;
     }
+    final secs = _sw.elapsed.inSeconds;
     final run = Run(
       start: _startedAt,
-      secs: _sw.elapsed.inSeconds,
+      secs: secs,
       meters: _meters,
       path: _pts.map((e) => [e.latitude, e.longitude]).toList(),
+      splits: List.of(_splits),
+      flag: checkRun(meters: _meters, secs: secs, rejected: _rejected, accepted: _accepted),
     );
     await runStore.add(run);
+    _voice.say('خلصت. ${fmtKm(run.km)} كيلو في ${spokenDur(secs)}');
     if (!mounted) return;
     Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => SummaryScreen(run: run, fresh: true)));
   }
@@ -143,6 +226,11 @@ class _RunScreenState extends State<RunScreen> {
     final secs = _sw.elapsed.inSeconds;
     final km = _meters / 1000;
     final gps = _accuracy <= 10 ? ('ممتاز', p.good) : _accuracy <= _maxAccuracy ? ('مقبول', p.goldInk) : ('يبحث…', p.bad);
+    final status = switch (_phase) {
+      _Phase.paused => 'متوقف',
+      _Phase.autoPaused => 'إيقاف تلقائي · تحرّك وتكمّل',
+      _ => null,
+    };
 
     return PopScope(
       canPop: false,
@@ -150,70 +238,125 @@ class _RunScreenState extends State<RunScreen> {
         if (!didPop) _finish();
       },
       child: Scaffold(
-        body: Column(children: [
-          Expanded(
-            child: Stack(children: [
-              Positioned.fill(
-                child: JMap(
-                  myLocation: true,
-                  follow: true,
-                  zoom: 16.5,
-                  onCreated: (c) => _map = c,
-                  onStyleLoaded: _draw,
+        body: Stack(children: [
+          Column(children: [
+            Expanded(
+              child: Stack(children: [
+                Positioned.fill(
+                  child: JMap(myLocation: true, follow: true, zoom: 16.5, onCreated: (c) => _map = c, onStyleLoaded: _draw),
                 ),
-              ),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(Gap.l),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                    decoration: BoxDecoration(color: p.card.withValues(alpha: .94), borderRadius: BorderRadius.circular(Radii.chip)),
-                    child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      Icon(Icons.gps_fixed, size: 16, color: gps.$2),
-                      const SizedBox(width: 6),
-                      Text('GPS ${gps.$1}', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: gps.$2)),
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(Gap.l),
+                    child: Row(children: [
+                      _Pill(icon: Icons.gps_fixed, text: 'GPS ${gps.$1}', color: gps.$2),
+                      const Spacer(),
+                      ListenableBuilder(
+                        listenable: settings,
+                        builder: (_, __) => IconButton.filledTonal(
+                          onPressed: () => settings.setVoice(!settings.voice),
+                          icon: Icon(settings.voice ? Icons.volume_up_rounded : Icons.volume_off_rounded),
+                          tooltip: settings.voice ? 'إيقاف الصوت' : 'تشغيل الصوت',
+                        ),
+                      ),
                     ]),
                   ),
                 ),
-              ),
-            ]),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: p.card,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(Radii.sheet)),
-              boxShadow: const [BoxShadow(color: Color(0x2214213D), blurRadius: 20, offset: Offset(0, -4))],
-            ),
-            padding: const EdgeInsets.fromLTRB(Gap.l, Gap.xl, Gap.l, Gap.l),
-            child: SafeArea(
-              top: false,
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Text(fmtKm(km), style: TextStyle(fontSize: 64, fontWeight: FontWeight.w700, height: 1, color: p.ink)),
-                Text('كيلومتر', style: TextStyle(color: p.muted, fontSize: 13)),
-                const SizedBox(height: Gap.l),
-                Row(children: [
-                  _Stat(value: fmtDur(secs), label: 'الزمن'),
-                  _Stat(value: fmtPace(km > 0.05 ? secs / km : 0), label: 'السرعة /كم'),
-                  _Stat(value: '${(km * pointsPerKm).floor()}', label: 'نقاط'),
-                ]),
-                const SizedBox(height: Gap.xl),
-                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  _RoundBtn(
-                    icon: _paused ? Icons.play_arrow_rounded : Icons.pause_rounded,
-                    label: _paused ? 'كمّل' : 'إيقاف مؤقت',
-                    color: _paused ? Brand.leaf : Brand.navy,
-                    onTap: _togglePause,
-                  ),
-                  const SizedBox(width: Gap.xxl),
-                  _RoundBtn(icon: Icons.stop_rounded, label: 'إنهاء', color: Brand.coral, onTap: _finish),
-                ]),
               ]),
             ),
-          ),
+            Container(
+              decoration: BoxDecoration(
+                color: p.card,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(Radii.sheet)),
+                boxShadow: const [BoxShadow(color: Color(0x2214213D), blurRadius: 20, offset: Offset(0, -4))],
+              ),
+              padding: const EdgeInsets.fromLTRB(Gap.l, Gap.l, Gap.l, Gap.l),
+              child: SafeArea(
+                top: false,
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: status == null
+                        ? const SizedBox(height: 26)
+                        : Container(
+                            key: ValueKey(status),
+                            height: 26,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(color: p.sunSoft, borderRadius: BorderRadius.circular(Radii.chip)),
+                            child: Text(status, style: TextStyle(color: p.goldInk, fontWeight: FontWeight.w600, fontSize: 12.5)),
+                          ),
+                  ),
+                  const SizedBox(height: Gap.s),
+                  Text(fmtKm(km), style: TextStyle(fontSize: 64, fontWeight: FontWeight.w700, height: 1, color: p.ink)),
+                  Text('كيلومتر', style: TextStyle(color: p.muted, fontSize: 13)),
+                  const SizedBox(height: Gap.l),
+                  Row(children: [
+                    _Stat(value: fmtDur(secs), label: 'الزمن'),
+                    _Stat(value: fmtPace(km > 0.05 ? secs / km : 0), label: 'السرعة /كم'),
+                    _Stat(value: '${(km * pointsPerKm).floor()}', label: 'نقاط'),
+                  ]),
+                  const SizedBox(height: Gap.xl),
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    _RoundBtn(
+                      icon: _phase == _Phase.paused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                      label: _phase == _Phase.paused ? 'كمّل' : 'إيقاف مؤقت',
+                      color: _phase == _Phase.paused ? Brand.leaf : Brand.navy,
+                      onTap: _phase == _Phase.countdown ? null : _togglePause,
+                    ),
+                    const SizedBox(width: Gap.xxl),
+                    _RoundBtn(icon: Icons.stop_rounded, label: 'إنهاء', color: Brand.coral, onTap: _finish),
+                  ]),
+                ]),
+              ),
+            ),
+          ]),
+          if (_phase == _Phase.countdown)
+            Positioned.fill(
+              child: ColoredBox(
+                color: Brand.navy.withValues(alpha: .88),
+                child: Center(
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      transitionBuilder: (c, a) => ScaleTransition(scale: a, child: c),
+                      child: Text('$_count',
+                          key: ValueKey(_count),
+                          style: const TextStyle(fontSize: 140, fontWeight: FontWeight.w700, color: Colors.white, height: 1)),
+                    ),
+                    const SizedBox(height: Gap.l),
+                    Text('GPS ${gps.$1}', style: const TextStyle(color: Color(0xFFA9B3C7), fontSize: 14)),
+                    const SizedBox(height: Gap.xl),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('إلغاء', style: TextStyle(color: Colors.white, fontSize: 16)),
+                    ),
+                  ]),
+                ),
+              ),
+            ),
         ]),
       ),
     );
   }
+}
+
+class _Pill extends StatelessWidget {
+  const _Pill({required this.icon, required this.text, required this.color});
+  final IconData icon;
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(color: context.pal.card.withValues(alpha: .94), borderRadius: BorderRadius.circular(Radii.chip)),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 6),
+          Text(text, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: color)),
+        ]),
+      );
 }
 
 class _Stat extends StatelessWidget {
@@ -234,12 +377,12 @@ class _RoundBtn extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) => Column(children: [
         Material(
-          color: color,
+          color: onTap == null ? color.withValues(alpha: .4) : color,
           shape: const CircleBorder(),
           child: InkWell(
             customBorder: const CircleBorder(),

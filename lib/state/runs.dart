@@ -8,24 +8,47 @@ import 'package:shared_preferences/shared_preferences.dart';
 const pointsPerKm = 10;
 
 class Run {
-  Run({required this.start, required this.secs, required this.meters, required this.path});
+  Run({
+    required this.start,
+    required this.secs,
+    required this.meters,
+    required this.path,
+    this.name,
+    this.splits = const [],
+    this.flag,
+  });
 
   final DateTime start;
+
+  /// Moving time in seconds (auto-pauses excluded).
   final int secs;
   final double meters;
 
   /// [lat, lng] pairs.
   final List<List<double>> path;
 
+  /// Custom title; falls back to a time-of-day name.
+  String? name;
+
+  /// Seconds taken for each full kilometre.
+  final List<int> splits;
+
+  /// Why the run earns no points (e.g. vehicle speed), or null if valid.
+  final String? flag;
+
   double get km => meters / 1000;
   double get secPerKm => meters > 0 ? secs / km : 0;
-  int get points => (km * pointsPerKm).floor();
+  int get points => flag != null ? 0 : (km * pointsPerKm).floor();
+  String get title => (name == null || name!.trim().isEmpty) ? runTitle(start) : name!;
 
   Map<String, dynamic> toJson() => {
         's': start.millisecondsSinceEpoch,
         't': secs,
         'm': meters,
         'p': path.map((e) => [double.parse(e[0].toStringAsFixed(6)), double.parse(e[1].toStringAsFixed(6))]).toList(),
+        if (name != null) 'n': name,
+        'k': splits,
+        if (flag != null) 'f': flag,
       };
 
   factory Run.fromJson(Map<String, dynamic> j) => Run(
@@ -33,7 +56,21 @@ class Run {
         secs: j['t'] as int,
         meters: (j['m'] as num).toDouble(),
         path: (j['p'] as List).map((e) => (e as List).map((v) => (v as num).toDouble()).toList()).toList(),
+        name: j['n'] as String?,
+        splits: ((j['k'] as List?) ?? const []).map((e) => e as int).toList(),
+        flag: j['f'] as String?,
       );
+}
+
+/// Anti-cheat check run when a run ends. Returns a reason or null.
+String? checkRun({required double meters, required int secs, required int rejected, required int accepted}) {
+  if (meters >= 1000 && secs > 0 && secs / (meters / 1000) < 150) {
+    return 'متوسط السرعة أسرع من 2:30 لكل كيلو، وهذا أسرع من الجري';
+  }
+  if (accepted + rejected >= 30 && rejected / (accepted + rejected) > .3) {
+    return 'قراءات GPS فيها قفزات كثيرة بسرعة مركبة';
+  }
+  return null;
 }
 
 class RunStore extends ChangeNotifier {
@@ -58,6 +95,12 @@ class RunStore extends ChangeNotifier {
 
   Future<void> remove(Run r) async {
     runs.remove(r);
+    notifyListeners();
+    await _save();
+  }
+
+  Future<void> rename(Run r, String name) async {
+    r.name = name.trim().isEmpty ? null : name.trim();
     notifyListeners();
     await _save();
   }
