@@ -53,7 +53,11 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Stack(fit: StackFit.expand, children: [
       Positioned.fill(child: JMap(onCreated: (c) => _map = c, myLocation: _loc)),
-      SafeArea(
+      Positioned(
+        top: 0,
+        left: 0,
+        right: 0,
+        child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(Gap.l),
           child: ListenableBuilder(
@@ -72,6 +76,7 @@ class _MapScreenState extends State<MapScreen> {
             ]),
           ),
         ),
+      ),
       ),
       Positioned(
         left: Gap.l,
