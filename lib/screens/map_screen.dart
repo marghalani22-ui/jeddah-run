@@ -51,7 +51,7 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [
+    return Stack(fit: StackFit.expand, children: [
       Positioned.fill(child: JMap(onCreated: (c) => _map = c, myLocation: _loc)),
       SafeArea(
         child: Padding(

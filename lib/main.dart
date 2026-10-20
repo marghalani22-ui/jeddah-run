@@ -65,7 +65,7 @@ class _ShellState extends State<Shell> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: IndexedStack(index: _i, children: _pages),
+        body: IndexedStack(index: _i, sizing: StackFit.expand, children: _pages),
         bottomNavigationBar: NavigationBar(
           selectedIndex: _i,
           onDestinationSelected: (v) => setState(() => _i = v),
