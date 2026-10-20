@@ -47,6 +47,9 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName(if (keystorePassword != null) "upload" else "debug")
+            // R8 renamed plugin methods (shared_preferences) and the app hung on the splash screen.
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }

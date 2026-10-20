@@ -16,9 +16,14 @@ import 'theme/app_theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  await Future.wait([settings.load(), runStore.load()]);
-  unawaited(cloud.init());
+  // Never block the first frame on storage: a failing plugin must not leave the splash screen up.
+  try {
+    await Future.wait([settings.load(), runStore.load()]).timeout(const Duration(seconds: 4));
+  } catch (e) {
+    debugPrint('startup load failed: $e');
+  }
   runApp(const JeddahRunApp());
+  unawaited(cloud.init());
 }
 
 class JeddahRunApp extends StatelessWidget {
