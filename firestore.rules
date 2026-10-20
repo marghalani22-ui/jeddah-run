@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Each runner can read and write only their own profile and runs.
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+
+      match /runs/{runId} {
+        allow read, delete: if request.auth != null && request.auth.uid == uid;
+        allow create, update: if request.auth != null && request.auth.uid == uid
+          && request.resource.data.meters is number
+          && request.resource.data.meters >= 0 && request.resource.data.meters < 200000
+          && request.resource.data.secs is int && request.resource.data.secs > 0
+          // average faster than 2:30 per km cannot carry points
+          && (request.resource.data.meters < 1000
+              || request.resource.data.secs / (request.resource.data.meters / 1000) >= 150
+              || request.resource.data.points == 0);
+      }
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

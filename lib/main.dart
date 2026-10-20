@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -6,6 +8,7 @@ import 'screens/log_screen.dart';
 import 'screens/map_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/shop_screen.dart';
+import 'services/cloud.dart';
 import 'state/runs.dart';
 import 'state/settings.dart';
 import 'theme/app_theme.dart';
@@ -14,6 +17,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await Future.wait([settings.load(), runStore.load()]);
+  unawaited(cloud.init());
   runApp(const JeddahRunApp());
 }
 

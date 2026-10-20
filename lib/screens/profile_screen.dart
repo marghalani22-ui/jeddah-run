@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../services/cloud.dart';
 import '../state/runs.dart';
 import '../state/settings.dart';
 import '../theme/tokens.dart';
@@ -32,6 +33,7 @@ class ProfileScreen extends StatelessWidget {
           final name = settings.name.isEmpty ? 'عدّاء' : settings.name;
           final fast = runStore.fastest, long = runStore.longest;
           return PageBody(title: 'ملفي', children: [
+            const _AccountCard(),
             Column(children: [
               CircleAvatar(
                 radius: 44,
@@ -108,6 +110,60 @@ class ProfileScreen extends StatelessWidget {
               ),
             ]),
           ]);
+        },
+      );
+}
+
+class _AccountCard extends StatelessWidget {
+  const _AccountCard();
+
+  Future<void> _signIn(BuildContext context) async {
+    final err = await cloud.signIn();
+    if (err != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+        listenable: cloud,
+        builder: (context, _) {
+          final p = context.pal, u = cloud.user;
+          if (u == null) {
+            return Card(
+              child: Padding(
+                padding: const EdgeInsets.all(Gap.l),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  Row(children: [
+                    Icon(Icons.cloud_off_outlined, color: p.muted),
+                    const SizedBox(width: Gap.s),
+                    Expanded(child: Text('جولاتك محفوظة على هذا الجوال بس', style: Theme.of(context).textTheme.titleMedium)),
+                  ]),
+                  const SizedBox(height: 4),
+                  Text('سجّل دخول عشان تنحفظ جولاتك ونقاطك ولا تضيع لو غيّرت جوالك.', style: Theme.of(context).textTheme.bodySmall),
+                  const SizedBox(height: Gap.m),
+                  FilledButton.icon(
+                    onPressed: cloud.busy || !cloud.ready ? null : () => _signIn(context),
+                    icon: cloud.busy
+                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : const Icon(Icons.login),
+                    label: Text(cloud.ready ? 'الدخول بحساب قوقل' : 'الخدمة غير متاحة الحين'),
+                  ),
+                ]),
+              ),
+            );
+          }
+          return Card(
+            child: ListTile(
+              leading: CircleAvatar(backgroundColor: p.goodSoft, child: Icon(Icons.cloud_done_outlined, color: p.good)),
+              title: Text(u.email ?? u.displayName ?? 'حسابك', style: const TextStyle(fontWeight: FontWeight.w600)),
+              subtitle: Text(
+                cloud.busy ? 'نزامن…' : (cloud.error ?? 'جولاتك محفوظة في حسابك'),
+                style: TextStyle(color: cloud.error != null ? p.bad : p.muted, fontSize: 12.5),
+              ),
+              trailing: TextButton(onPressed: cloud.signOut, child: const Text('خروج')),
+            ),
+          );
         },
       );
 }

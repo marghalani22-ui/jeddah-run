@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "427085259383",
+    "project_id": "jeddah-run",
+    "storage_bucket": "jeddah-run.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:427085259383:android:1bbaf498c8aabb484bdc72",
+        "android_client_info": {
+          "package_name": "sa.jeddahrun.jeddah_run"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxp6L_0txiBqP-qv0q2SQ5Nyd6NoT5IDE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

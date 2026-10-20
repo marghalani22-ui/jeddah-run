@@ -73,8 +73,13 @@ String? checkRun({required double meters, required int secs, required int reject
   return null;
 }
 
+enum RunChange { added, updated, removed }
+
 class RunStore extends ChangeNotifier {
   final List<Run> runs = [];
+
+  /// Hook for cloud sync; called after each local change.
+  Future<void> Function(RunChange kind, Run run)? onChange;
 
   Future<void> load() async {
     final sp = await SharedPreferences.getInstance();
@@ -91,18 +96,29 @@ class RunStore extends ChangeNotifier {
     runs.insert(0, r);
     notifyListeners();
     await _save();
+    onChange?.call(RunChange.added, r);
+  }
+
+  /// Adds runs that came from the server (no sync callback).
+  Future<void> addAll(List<Run> more) async {
+    runs.addAll(more);
+    runs.sort((a, b) => b.start.compareTo(a.start));
+    notifyListeners();
+    await _save();
   }
 
   Future<void> remove(Run r) async {
     runs.remove(r);
     notifyListeners();
     await _save();
+    onChange?.call(RunChange.removed, r);
   }
 
   Future<void> rename(Run r, String name) async {
     r.name = name.trim().isEmpty ? null : name.trim();
     notifyListeners();
     await _save();
+    onChange?.call(RunChange.updated, r);
   }
 
   Future<void> _save() async {
