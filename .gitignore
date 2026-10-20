@@ -10,7 +10,7 @@
 *.iml
 .DS_Store
 # generated in CI until we customise native code
-/android/
+
 /ios/
 /linux/
 /macos/
@@ -21,3 +21,5 @@
 *.keystore
 key.properties
 google-services.json
+# password-protected upload key; the password lives in the KEYSTORE_PASSWORD secret
+!signing/upload.jks
