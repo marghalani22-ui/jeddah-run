@@ -12,7 +12,20 @@
           "package_name": "sa.jeddahrun.jeddah_run"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "427085259383-0a9pspajujo5kbbfql0ogklq0bph0smp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "sa.jeddahrun.jeddah_run",
+            "certificate_hash": "18c4191fbaf54666c823f19cba2d5a9eac81e179"
+          }
+        },
+        {
+          "client_id": "427085259383-eijfpe028f5vfgsnplg6tihlgff58hs0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDxp6L_0txiBqP-qv0q2SQ5Nyd6NoT5IDE"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "427085259383-eijfpe028f5vfgsnplg6tihlgff58hs0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

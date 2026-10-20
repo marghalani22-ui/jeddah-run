@@ -21,7 +21,7 @@ class Cloud extends ChangeNotifier {
   Future<void> init() async {
     try {
       await Firebase.initializeApp();
-      await GoogleSignIn.instance.initialize();
+      await GoogleSignIn.instance.initialize(serverClientId: _webClientId);
       ready = true;
       user = FirebaseAuth.instance.currentUser;
       FirebaseAuth.instance.authStateChanges().listen((u) {
@@ -156,5 +156,8 @@ Run fromCloud(Map<String, dynamic> j) {
     flag: j['flag'] as String?,
   );
 }
+
+/// Web OAuth client (type 3) from google-services.json, used to mint the ID token.
+const _webClientId = '427085259383-eijfpe028f5vfgsnplg6tihlgff58hs0.apps.googleusercontent.com';
 
 final cloud = Cloud();

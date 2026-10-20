@@ -38,6 +38,9 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: flutter build apk --release > out.txt 2>&1 || { grep -iE "error|exception|failed" out.txt | head -40 | sed 's/^/::error::/'; exit 1; }
 
+      - name: Report signing certificate
+        run: echo "::notice::signed with SHA1 $(keytool -printcert -jarfile build/app/outputs/flutter-apk/app-release.apk | grep -m1 SHA1 | awk '{print $2}')"
+
       - uses: actions/upload-artifact@v4
         with:
           name: jeddah-run-apk
