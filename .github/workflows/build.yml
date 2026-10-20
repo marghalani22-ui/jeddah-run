@@ -58,3 +58,38 @@ jobs:
           gh release create "build-${{ github.run_number }}" jeddah-run.apk \
             --title "نسخة ${{ github.run_number }}" \
             --notes "${{ github.event.head_commit.message }}" --latest
+
+  # Runs the built APK on an Android emulator and pushes screenshots/logs to the "diag" branch.
+  diagnose:
+    needs: apk
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: jeddah-run-apk
+      - run: mv app-release.apk jeddah-run.apk
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          ram-size: 4096M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: bash .github/scripts/diagnose.sh
+      - name: Push diagnostics
+        run: |
+          mv diag /tmp/diag
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git checkout --orphan diag
+          git rm -rfq . ; cp -r /tmp/diag ./diag
+          echo "${{ github.sha }}" > diag/commit.txt
+          git add diag && git commit -qm "diagnostics for ${{ github.sha }}"
+          git push -f origin diag
