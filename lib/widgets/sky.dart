@@ -32,10 +32,11 @@ class _SkyBandState extends State<SkyBand> with SingleTickerProviderStateMixin {
           child: RepaintBoundary(
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 900),
+              layoutBuilder: (cur, prev) => Stack(fit: StackFit.expand, children: [...prev, if (cur != null) cur]),
               child: AnimatedBuilder(
                 key: ValueKey(widget.phase),
                 animation: _a,
-                builder: (_, __) => CustomPaint(painter: SkyPainter(widget.phase, _a.value, phaseClock.dayProgress)),
+                builder: (_, __) => CustomPaint(size: Size.infinite, painter: SkyPainter(widget.phase, _a.value, phaseClock.dayProgress)),
               ),
             ),
           ),
