@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
+import '../state/game.dart';
 import '../state/runs.dart';
 import '../theme/tokens.dart';
 import '../widgets/common.dart';
@@ -10,9 +11,10 @@ import 'share_screen.dart';
 
 /// Run summary: route on the real map, the numbers, and points earned.
 class SummaryScreen extends StatefulWidget {
-  const SummaryScreen({super.key, required this.run, this.fresh = false});
+  const SummaryScreen({super.key, required this.run, this.fresh = false, this.rewards = const []});
   final Run run;
   final bool fresh;
+  final List<Reward> rewards;
 
   @override
   State<SummaryScreen> createState() => _SummaryScreenState();
@@ -120,6 +122,10 @@ class _SummaryScreenState extends State<SummaryScreen> {
           Kpi(value: fmtPace(r.secPerKm), unit: '/كم', label: 'متوسط السرعة'),
           Kpi(value: '+${r.points}', label: 'نقاط'),
         ]),
+        if (widget.rewards.isNotEmpty) ...[
+          const SizedBox(height: Gap.xl),
+          _Rewards(rewards: widget.rewards),
+        ],
         if (r.splits.isNotEmpty) ...[
           const SizedBox(height: Gap.xl),
           const SectionHead('كل كيلو', trailing: 'الزمن'),
@@ -194,6 +200,48 @@ class _Splits extends StatelessWidget {
             ),
         ]),
       ),
+    );
+  }
+}
+
+class _Rewards extends StatelessWidget {
+  const _Rewards({required this.rewards});
+  final List<Reward> rewards;
+
+  @override
+  Widget build(BuildContext context) {
+    final total = rewards.fold(0, (a, r) => a + r.points);
+    final (lv, into, need) = game.level;
+    return Container(
+      padding: const EdgeInsets.all(Gap.l),
+      decoration: BoxDecoration(gradient: Grad.night, borderRadius: BorderRadius.circular(24)),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
+          const Expanded(child: Text('مكسبك من الجولة', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16))),
+          ShaderMask(
+            shaderCallback: (r) => Grad.sunset.createShader(r),
+            child: Text('+$total', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 26)),
+          ),
+        ]),
+        const SizedBox(height: Gap.s),
+        for (final r in rewards)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Row(children: [
+              Icon(r.icon, color: r.kind == 'badge' ? Brand.sun : const Color(0xFFA3AEC6), size: 20),
+              const SizedBox(width: Gap.s),
+              Expanded(child: Text(r.label, style: const TextStyle(color: Colors.white, fontSize: 14))),
+              Text('+${r.points}', style: const TextStyle(color: Brand.sun, fontWeight: FontWeight.w700)),
+            ]),
+          ),
+        const SizedBox(height: Gap.m),
+        Text('المستوى $lv · ${levelTitle(lv)}', style: const TextStyle(color: Color(0xFFA3AEC6), fontSize: 12.5)),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: LinearProgressIndicator(value: into / need, minHeight: 7, color: Brand.sun, backgroundColor: const Color(0x33FFFFFF)),
+        ),
+      ]),
     );
   }
 }

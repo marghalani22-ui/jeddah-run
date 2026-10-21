@@ -12,6 +12,7 @@ import 'screens/shop_screen.dart';
 import 'services/cloud.dart';
 import 'services/reminders.dart';
 import 'services/social.dart';
+import 'state/game.dart';
 import 'state/runs.dart';
 import 'state/settings.dart';
 import 'theme/app_theme.dart';
@@ -21,7 +22,8 @@ Future<void> main() async {
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   // Never block the first frame on storage: a failing plugin must not leave the splash screen up.
   try {
-    await Future.wait([settings.load(), runStore.load()]).timeout(const Duration(seconds: 4));
+    await Future.wait([settings.load(), runStore.load(), game.load()]).timeout(const Duration(seconds: 4));
+    await game.backfill();
   } catch (e) {
     debugPrint('startup load failed: $e');
   }

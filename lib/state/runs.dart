@@ -1,11 +1,16 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Points rule: 10 points per full kilometre (subscribers ×2 later).
+/// Points rule: 10 points per FULL kilometre (half a km earns nothing),
+/// at most [dailyRunCap] points a day from distance. Streak bonuses,
+/// challenges and badges are on top of the cap (see game.dart).
 const pointsPerKm = 10;
+const dailyRunCap = 300;
+
+int kmPoints(double km) => km.floor() * pointsPerKm;
 
 class Run {
   Run({
@@ -16,6 +21,7 @@ class Run {
     this.name,
     this.splits = const [],
     this.flag,
+    this.awarded,
   });
 
   final DateTime start;
@@ -36,9 +42,12 @@ class Run {
   /// Why the run earns no points (e.g. vehicle speed), or null if valid.
   final String? flag;
 
+  /// Distance points actually credited after the daily cap.
+  int? awarded;
+
   double get km => meters / 1000;
   double get secPerKm => meters > 0 ? secs / km : 0;
-  int get points => flag != null ? 0 : (km * pointsPerKm).floor();
+  int get points => flag != null ? 0 : (awarded ?? kmPoints(km));
   String get title => (name == null || name!.trim().isEmpty) ? runTitle(start) : name!;
 
   Map<String, dynamic> toJson() => {
@@ -49,6 +58,7 @@ class Run {
         if (name != null) 'n': name,
         'k': splits,
         if (flag != null) 'f': flag,
+        if (awarded != null) 'a': awarded,
       };
 
   factory Run.fromJson(Map<String, dynamic> j) => Run(
@@ -59,6 +69,7 @@ class Run {
         name: j['n'] as String?,
         splits: ((j['k'] as List?) ?? const []).map((e) => e as int).toList(),
         flag: j['f'] as String?,
+        awarded: j['a'] as int?,
       );
 }
 
@@ -92,7 +103,11 @@ class RunStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Distance points already credited on the day of [d].
+  int pointsOnDay(DateTime d) => runs.where((r) => DateUtils.isSameDay(r.start, d)).fold(0, (a, r) => a + r.points);
+
   Future<void> add(Run r) async {
+    if (r.flag == null) r.awarded = math.min(kmPoints(r.km), math.max(0, dailyRunCap - pointsOnDay(r.start)));
     runs.insert(0, r);
     notifyListeners();
     await _save();

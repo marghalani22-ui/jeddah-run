@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../services/cloud.dart';
 import '../services/reminders.dart';
+import '../state/game.dart';
+import '../widgets/game_widgets.dart';
 import '../state/runs.dart';
 import '../state/settings.dart';
 import '../theme/tokens.dart';
@@ -29,7 +31,7 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-        listenable: Listenable.merge([runStore, settings]),
+        listenable: Listenable.merge([runStore, settings, game]),
         builder: (context, _) {
           final p = context.pal;
           final name = settings.name.isEmpty ? 'عدّاء' : settings.name;
@@ -53,6 +55,16 @@ class ProfileScreen extends StatelessWidget {
                 onPressed: () => _editName(context),
                 icon: Icon(Icons.edit_outlined, size: 16, color: p.muted),
                 label: Text(name, style: Theme.of(context).textTheme.titleLarge),
+              ),
+            ]),
+            const LevelCard(),
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              SectionHead('أوسمتي', trailing: '${game.badges.length} من ${badgeDefs.length}'),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(Gap.s, Gap.l, Gap.s, Gap.s),
+                  child: BadgeGrid(progressOf: (b) => b.progress(runStore)),
+                ),
               ),
             ]),
             KpiCard(children: [

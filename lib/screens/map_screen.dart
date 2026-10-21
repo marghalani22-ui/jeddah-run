@@ -5,7 +5,9 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 import '../services/location.dart';
 import '../state/runs.dart';
 import '../state/settings.dart';
+import '../state/game.dart';
 import '../state/mood.dart';
+import '../widgets/game_widgets.dart';
 import '../theme/tokens.dart';
 import '../widgets/common.dart';
 import '../widgets/gradient_button.dart';
@@ -64,8 +66,12 @@ class _MapScreenState extends State<MapScreen> {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(Gap.m, Gap.m, Gap.m, 0),
             child: ListenableBuilder(
-              listenable: Listenable.merge([runStore, settings]),
-              builder: (context, _) => const _Header(),
+              listenable: Listenable.merge([runStore, settings, game]),
+              builder: (context, _) => const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                _Header(),
+                SizedBox(height: Gap.s),
+                ChallengesPill(),
+              ]),
             ),
           ),
         ),
@@ -119,7 +125,7 @@ class _Header extends StatelessWidget {
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           const Icon(Icons.toll, color: Brand.sun, size: 20),
           const SizedBox(width: 6),
-          Text('${runStore.points}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
+          Text('${game.balance}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
         ]),
       ),
     ]);

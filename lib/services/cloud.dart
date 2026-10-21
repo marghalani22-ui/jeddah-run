@@ -145,6 +145,7 @@ Map<String, dynamic> toCloud(Run r) => {
       'name': r.name,
       'flag': r.flag,
       'points': r.points,
+      'awarded': r.points,
       'savedAt': FieldValue.serverTimestamp(),
     };
 
@@ -158,6 +159,7 @@ Run fromCloud(Map<String, dynamic> j) {
     splits: ((j['splits'] as List?) ?? const []).map((e) => e as int).toList(),
     name: j['name'] as String?,
     flag: j['flag'] as String?,
+    awarded: (j['awarded'] as num?)?.toInt(),
   );
 }
 

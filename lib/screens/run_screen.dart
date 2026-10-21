@@ -8,6 +8,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../services/location.dart';
 import '../services/reminders.dart';
+import '../state/game.dart';
 import '../services/voice.dart';
 import '../state/runs.dart';
 import '../state/settings.dart';
@@ -217,11 +218,12 @@ class _RunScreenState extends State<RunScreen> {
     );
     final weekBefore = runStore.weekKm;
     await runStore.add(run);
+    final rewards = await game.afterRun(run);
     reminders.celebrate(run, weekBefore: weekBefore);
     reminders.refresh();
     _voice.say('خلصت. ${fmtKm(run.km)} كيلو في ${spokenDur(secs)}');
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => SummaryScreen(run: run, fresh: true)));
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => SummaryScreen(run: run, fresh: true, rewards: rewards)));
   }
 
   @override
@@ -296,7 +298,7 @@ class _RunScreenState extends State<RunScreen> {
                   Row(children: [
                     _Stat(value: fmtDur(secs), label: 'الزمن'),
                     _Stat(value: fmtPace(km > 0.05 ? secs / km : 0), label: 'لكل كم'),
-                    _Stat(value: '+${(km * pointsPerKm).floor()}', label: 'نقطة', color: Brand.sun),
+                    _Stat(value: '+${kmPoints(km)}', label: 'نقطة', color: Brand.sun),
                   ]),
                   if (_splits.isNotEmpty) ...[
                     const SizedBox(height: Gap.m),

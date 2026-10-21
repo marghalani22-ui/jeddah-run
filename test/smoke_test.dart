@@ -33,4 +33,10 @@ void main() {
     final flagged = Run(start: DateTime(2026), secs: 500, meters: 5000, path: const [], flag: 'x');
     expect(flagged.points, 0);
   });
+
+  test('points: full km only', () {
+    expect(kmPoints(0.6), 0);
+    expect(kmPoints(1.99), 10);
+    expect(kmPoints(31.4), 310);
+  });
 }

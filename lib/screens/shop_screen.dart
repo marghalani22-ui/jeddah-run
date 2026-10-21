@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../state/game.dart';
 import '../state/runs.dart';
 import '../theme/tokens.dart';
 import '../widgets/common.dart';
@@ -9,7 +10,7 @@ class ShopScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-        listenable: runStore,
+        listenable: Listenable.merge([runStore, game]),
         builder: (context, _) => PageBody(title: 'المتجر', children: [
           Container(
             padding: const EdgeInsets.all(18),
@@ -23,9 +24,9 @@ class ShopScreen extends StatelessWidget {
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   const Text('رصيد النقاط', style: TextStyle(color: Color(0xFFA9B3C7), fontSize: 12.5)),
-                  Text('${runStore.points}',
+                  Text('${game.balance}',
                       style: const TextStyle(color: Colors.white, fontSize: 34, fontWeight: FontWeight.w700, height: 1.1)),
-                  const Text('$pointsPerKm نقاط لكل كيلومتر تجريه',
+                  const Text('$pointsPerKm نقاط لكل كيلو كامل · لين $dailyRunCap باليوم',
                       style: TextStyle(color: Color(0xFFFFD27A), fontSize: 12.5, fontWeight: FontWeight.w600)),
                 ]),
               ),
