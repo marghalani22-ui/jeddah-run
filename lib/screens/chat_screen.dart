@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 import '../services/social.dart';
 import '../state/runs.dart';
 import '../theme/tokens.dart';
+import '../widgets/friend_avatar.dart';
 
 /// One-to-one chat with a friend.
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key, required this.otherUid});
+  const ChatScreen({super.key, required this.otherUid, this.debugMessages});
   final String otherUid;
+
+  /// Preview tests feed messages directly instead of Firestore.
+  final Stream<List<Message>>? debugMessages;
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -16,7 +20,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _ctl = TextEditingController();
   late final String _chatId = pairId(social.me!, widget.otherUid);
-  late final Stream<List<Message>> _stream = social.messages(_chatId);
+  late final Stream<List<Message>> _stream = widget.debugMessages ?? social.messages(_chatId);
 
   static const _quick = ['يلا نجري بكرة؟ 🏃', 'كم جريت اليوم؟', 'كفو عليك! 🔥', 'نلتقي الكورنيش الساعة 6'];
 
@@ -97,12 +101,27 @@ class _ChatScreenState extends State<ChatScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ok ? 'وصلنا البلاغ، شكراً لك' : 'ما انرسل البلاغ، جرّب مرة ثانية')));
   }
 
+  String _clock(DateTime d) => '${d.hour % 12 == 0 ? 12 : d.hour % 12}:${d.minute.toString().padLeft(2, '0')}${d.hour < 12 ? 'ص' : 'م'}';
+
+  String _day(DateTime d) {
+    final now = DateTime.now();
+    if (DateUtils.isSameDay(d, now)) return 'اليوم';
+    if (DateUtils.isSameDay(d, now.subtract(const Duration(days: 1)))) return 'أمس';
+    const names = ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'];
+    if (now.difference(d).inDays < 7) return names[d.weekday - 1];
+    return '${d.day}/${d.month}/${d.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
     final prof = social.profiles[widget.otherUid];
+    final name = prof?.name ?? '…';
     return Scaffold(
+      backgroundColor: p.sand,
       appBar: AppBar(
+        backgroundColor: p.sand,
+        surfaceTintColor: Colors.transparent,
         titleSpacing: 0,
         actions: [
           PopupMenuButton<String>(
@@ -115,19 +134,20 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ],
         title: Row(children: [
-          CircleAvatar(radius: 18, backgroundColor: Brand.coral, child: Text((prof?.name ?? '؟').characters.first, style: const TextStyle(color: Colors.white))),
+          FriendAvatar(name: name, size: 38, ring: (prof?.weekKm ?? 0) > 0),
           const SizedBox(width: Gap.s),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(prof?.name ?? '…', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+              Text(name, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: p.ink)),
               if (prof != null)
-                Text('${fmtKm(prof.weekKm)} كم هالأسبوع${prof.streak > 0 ? ' · ${prof.streak} أيام متتالية' : ''}',
+                Text('${fmtKm(prof.weekKm)} كم هالأسبوع${prof.streak > 0 ? ' · ${prof.streak} 🔥' : ''}',
                     style: TextStyle(fontSize: 12, color: p.muted)),
             ]),
           ),
         ]),
       ),
       body: Column(children: [
+        Divider(height: 1, color: p.edge),
         Expanded(
           child: StreamBuilder<List<Message>>(
             stream: _stream,
@@ -141,97 +161,201 @@ class _ChatScreenState extends State<ChatScreen> {
                 return Center(
                   child: Padding(
                     padding: const EdgeInsets.all(Gap.xl),
-                    child: Text('ابدأ السوالف، أو اختر رسالة سريعة تحت', textAlign: TextAlign.center, style: TextStyle(color: p.muted)),
+                    child: Column(mainAxisSize: MainAxisSize.min, children: [
+                      FriendAvatar(name: name, size: 84, ring: true),
+                      const SizedBox(height: Gap.m),
+                      Text('قل هلا لـ $name 👋', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: p.ink)),
+                      const SizedBox(height: 4),
+                      Text('أرسل رد سريع أو تحدّاه على جولة', textAlign: TextAlign.center, style: TextStyle(color: p.muted)),
+                    ]),
                   ),
                 );
               }
               return ListView.builder(
                 reverse: true,
-                padding: const EdgeInsets.symmetric(horizontal: Gap.m, vertical: Gap.m),
+                padding: const EdgeInsets.fromLTRB(Gap.l, Gap.s, Gap.l, Gap.m),
                 itemCount: msgs.length,
                 itemBuilder: (_, i) {
+                  // Newest first: msgs[i + 1] is the message just above this one.
                   final m = msgs[i];
                   final mine = m.from == social.me;
-                  final newer = i > 0 ? msgs[i - 1] : null;
-                  final tail = newer == null || newer.from != m.from;
-                  return Align(
-                    // RTL: my messages sit on the left (end), theirs on the right (start).
-                    alignment: mine ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart,
-                    child: Container(
-                      margin: EdgeInsets.only(top: 2, bottom: tail ? 8 : 2),
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * .74),
-                      decoration: BoxDecoration(
-                        gradient: mine ? const LinearGradient(colors: [Color(0xFFF25C2C), Color(0xFFF77A2A)]) : null,
-                        color: mine ? null : p.card,
-                        border: mine ? null : Border.all(color: p.edge),
-                        borderRadius: BorderRadiusDirectional.only(
-                          topStart: const Radius.circular(18),
-                          topEnd: const Radius.circular(18),
-                          bottomStart: Radius.circular(mine ? 18 : (tail ? 4 : 18)),
-                          bottomEnd: Radius.circular(mine ? (tail ? 4 : 18) : 18),
+                  final above = i + 1 < msgs.length ? msgs[i + 1] : null;
+                  final newDay = above == null || !DateUtils.isSameDay(above.at, m.at);
+                  final newGroup = newDay || above.from != m.from || m.at.difference(above.at).inMinutes > 20;
+                  final color = mine ? Brand.coral : Brand.sea;
+                  return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                    if (newDay)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: Gap.m),
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            decoration: BoxDecoration(color: p.sand2, borderRadius: BorderRadius.circular(12)),
+                            child: Text(_day(m.at), style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: p.muted)),
+                          ),
                         ),
                       ),
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.end, mainAxisSize: MainAxisSize.min, children: [
-                        Text(m.text, style: TextStyle(color: mine ? Colors.white : p.ink, fontSize: 15, height: 1.35)),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${m.at.hour % 12 == 0 ? 12 : m.at.hour % 12}:${m.at.minute.toString().padLeft(2, '0')}',
-                          style: TextStyle(color: mine ? Colors.white70 : p.muted, fontSize: 10.5),
-                        ),
-                      ]),
+                    if (newGroup)
+                      Padding(
+                        padding: EdgeInsets.only(top: newDay ? 0 : Gap.m, bottom: 3),
+                        child: Row(children: [
+                          Text(mine ? 'أنا' : name, style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: color)),
+                          const SizedBox(width: 6),
+                          Text(_clock(m.at), style: TextStyle(fontSize: 11, color: p.muted)),
+                        ]),
+                      ),
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 2),
+                      padding: const EdgeInsetsDirectional.only(start: 10, top: 2, bottom: 2),
+                      decoration: BoxDecoration(border: BorderDirectional(start: BorderSide(color: color, width: 2.5))),
+                      child: _isEmoji(m.text)
+                          ? Text(m.text, style: const TextStyle(fontSize: 40, height: 1.2))
+                          : Text(m.text, style: TextStyle(color: p.ink, fontSize: 15.5, height: 1.4)),
                     ),
-                  );
+                  ]);
                 },
               );
             },
           ),
         ),
-        SizedBox(
-          height: 44,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: Gap.m),
-            itemCount: _quick.length,
-            separatorBuilder: (_, __) => const SizedBox(width: Gap.s),
-            itemBuilder: (_, i) => ActionChip(label: Text(_quick[i]), onPressed: () => _send(_quick[i])),
+        _Composer(ctl: _ctl, quick: _quick, onSend: _send),
+      ]),
+    );
+  }
+
+  static final _emojiOnly = RegExp(r'^(\p{Extended_Pictographic}|‍|️|\s){1,8}$', unicode: true);
+  bool _isEmoji(String t) => t.trim().isNotEmpty && _emojiOnly.hasMatch(t.trim());
+}
+
+/// Bottom bar: one-tap reactions, quick replies, and a pill text field.
+class _Composer extends StatefulWidget {
+  const _Composer({required this.ctl, required this.quick, required this.onSend});
+  final TextEditingController ctl;
+  final List<String> quick;
+  final Future<void> Function([String?]) onSend;
+
+  @override
+  State<_Composer> createState() => _ComposerState();
+}
+
+class _ComposerState extends State<_Composer> {
+  bool _showQuick = false;
+  static const _reactions = ['🔥', '👏', '🏃', '💪', '😂', '❤️'];
+
+  @override
+  void initState() {
+    super.initState();
+    widget.ctl.addListener(_changed);
+  }
+
+  @override
+  void dispose() {
+    widget.ctl.removeListener(_changed);
+    super.dispose();
+  }
+
+  void _changed() => setState(() {});
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.pal;
+    final hasText = widget.ctl.text.trim().isNotEmpty;
+    return Container(
+      decoration: BoxDecoration(color: p.card, border: Border(top: BorderSide(color: p.edge))),
+      child: SafeArea(
+        top: false,
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          AnimatedSize(
+            duration: const Duration(milliseconds: 180),
+            child: _showQuick
+                ? SizedBox(
+                    height: 46,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.fromLTRB(Gap.m, Gap.s, Gap.m, 0),
+                      itemCount: widget.quick.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: Gap.s),
+                      itemBuilder: (_, i) => ActionChip(
+                        label: Text(widget.quick[i]),
+                        onPressed: () {
+                          widget.onSend(widget.quick[i]);
+                          setState(() => _showQuick = false);
+                        },
+                      ),
+                    ),
+                  )
+                : const SizedBox(width: double.infinity),
           ),
-        ),
-        SafeArea(
-          top: false,
-          child: Padding(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(Gap.m, Gap.s, Gap.m, 0),
+            child: Row(children: [
+              for (final e in _reactions)
+                Expanded(
+                  child: InkResponse(
+                    onTap: () => widget.onSend(e),
+                    radius: 22,
+                    child: Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Text(e, textAlign: TextAlign.center, style: const TextStyle(fontSize: 24))),
+                  ),
+                ),
+            ]),
+          ),
+          Padding(
             padding: const EdgeInsets.fromLTRB(Gap.m, Gap.s, Gap.m, Gap.m),
             child: Row(children: [
+              InkResponse(
+                onTap: () => setState(() => _showQuick = !_showQuick),
+                radius: 24,
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(color: _showQuick ? Brand.coral : p.sand2, shape: BoxShape.circle),
+                  child: Icon(Icons.bolt_rounded, color: _showQuick ? Colors.white : p.ink),
+                ),
+              ),
+              const SizedBox(width: Gap.s),
               Expanded(
                 child: TextField(
-                  controller: _ctl,
+                  controller: widget.ctl,
                   minLines: 1,
                   maxLines: 4,
                   maxLength: 1000,
                   textInputAction: TextInputAction.send,
-                  onSubmitted: (_) => _send(),
+                  onSubmitted: (_) => widget.onSend(),
                   decoration: InputDecoration(
-                    hintText: 'اكتب رسالة',
+                    hintText: 'دردش',
                     counterText: '',
                     filled: true,
-                    fillColor: p.card,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide(color: p.edge)),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide(color: p.edge)),
+                    fillColor: p.sand2,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
                   ),
                 ),
               ),
-              const SizedBox(width: Gap.s),
-              IconButton.filled(
-                style: IconButton.styleFrom(backgroundColor: Brand.coral, minimumSize: const Size(48, 48)),
-                onPressed: () => _send(),
-                icon: const Icon(Icons.send_rounded, color: Colors.white, textDirection: TextDirection.rtl),
-                tooltip: 'إرسال',
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 160),
+                transitionBuilder: (c, a) => ScaleTransition(scale: a, child: c),
+                child: hasText
+                    ? Padding(
+                        key: const ValueKey('send'),
+                        padding: const EdgeInsetsDirectional.only(start: Gap.s),
+                        child: InkResponse(
+                          onTap: () => widget.onSend(),
+                          radius: 24,
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: const BoxDecoration(gradient: Grad.sunset, shape: BoxShape.circle),
+                            child: const Icon(Icons.send_rounded, color: Colors.white, size: 20, textDirection: TextDirection.rtl),
+                          ),
+                        ),
+                      )
+                    : const SizedBox(key: ValueKey('none')),
               ),
             ]),
           ),
-        ),
-      ]),
+        ]),
+      ),
     );
   }
 }

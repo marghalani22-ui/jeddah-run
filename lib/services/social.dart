@@ -64,7 +64,10 @@ String pairId(String a, String b) => (a.compareTo(b) < 0) ? '${a}_$b' : '${b}_$a
 ///   profiles/{uid}, usernames/{name}, friendships/{pair}, chats/{pair}/messages/{id}
 class Social extends ChangeNotifier {
   FirebaseFirestore get _db => FirebaseFirestore.instance;
-  String? get me => FirebaseAuth.instance.currentUser?.uid;
+  /// Set only by preview tests, which run without Firebase.
+  @visibleForTesting
+  String? debugMe;
+  String? get me => debugMe ?? FirebaseAuth.instance.currentUser?.uid;
 
   Profile? mine;
   List<Friendship> friendships = [];
