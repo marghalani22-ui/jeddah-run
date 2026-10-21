@@ -9,23 +9,8 @@ adb shell pm grant $PKG android.permission.ACCESS_FINE_LOCATION
 adb shell pm grant $PKG android.permission.ACCESS_COARSE_LOCATION
 adb logcat -c
 W=$(adb shell wm size | grep -oE "[0-9]+x[0-9]+" | tail -1); SW=${W%x*}; SH=${W#*x}
-# Tap the widget whose label contains $1; fall back to ($2% height, centre).
-tap_label() {
-  adb shell uiautomator dump /sdcard/ui.xml > /dev/null 2>&1
-  adb shell cat /sdcard/ui.xml > diag/ui.xml 2>/dev/null
-  B=$(python3 - "$1" <<'PY'
-import re, sys
-x = open('diag/ui.xml', encoding='utf-8', errors='ignore').read()
-for m in re.finditer(r'<node [^>]*>', x):
-    n = m.group(0)
-    if sys.argv[1] in n:
-        b = re.search(r'bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', n)
-        if b:
-            a, c, d, e = map(int, b.groups()); print((a + d) // 2, (c + e) // 2); break
-PY
-)
-  if [ -n "$B" ]; then adb shell input tap $B; else adb shell input tap $((SW/2)) $((SH*$2/100)); fi
-}
+# Onboarding buttons sit at fixed heights (percent of screen), centred.
+tap_label() { adb shell input tap $((SW/2)) $((SH*$2/100)); }
 # first launch: onboarding
 adb shell am start -W -n $PKG/.MainActivity > diag/start1.txt 2>&1
 sleep 15; adb exec-out screencap -p > diag/ob-1.png
