@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../state/runs.dart';
 import '../theme/tokens.dart';
+import '../widgets/brand_mark.dart';
 import '../widgets/route_painter.dart';
 
 enum _Tpl { photo, map, sticker, minimal }
@@ -227,15 +228,10 @@ class _Brand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
-        Container(
-          width: 20,
-          height: 20,
-          decoration: const BoxDecoration(color: Brand.coral, shape: BoxShape.circle),
-          child: const Icon(Icons.directions_run, size: 13, color: Colors.white),
-        ),
+        LaffaMark(width: 30, runner: color == Colors.white ? const Color(0xFF14213D) : Colors.white, color: color == Colors.white ? Colors.white : null),
         const SizedBox(width: 6),
         Text('لفّة',
-            style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: 13, shadows: shadow ? _shadow : null)),
+            style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: 14, shadows: shadow ? _shadow : null)),
       ]);
 }
 
