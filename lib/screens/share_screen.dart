@@ -96,7 +96,7 @@ class _ShareScreenState extends State<ShareScreen> {
       final dir = await getTemporaryDirectory();
       final f = File('${dir.path}/jeddah-run-${DateTime.now().millisecondsSinceEpoch}.png');
       await f.writeAsBytes(data!.buffer.asUint8List());
-      await Share.shareXFiles([XFile(f.path, mimeType: 'image/png')], text: '${fmtKm(widget.run.km)} كم مع #جري_جدة');
+      await Share.shareXFiles([XFile(f.path, mimeType: 'image/png')], text: '${fmtKm(widget.run.km)} كم مع #لفّة');
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('تعذّرت المشاركة: $e')));
     } finally {
@@ -234,7 +234,7 @@ class _Brand extends StatelessWidget {
           child: const Icon(Icons.directions_run, size: 13, color: Colors.white),
         ),
         const SizedBox(width: 6),
-        Text('جري جدة',
+        Text('لفّة',
             style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: 13, shadows: shadow ? _shadow : null)),
       ]);
 }

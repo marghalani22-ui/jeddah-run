@@ -33,7 +33,7 @@ class JeddahRunApp extends StatelessWidget {
   Widget build(BuildContext context) => ListenableBuilder(
         listenable: settings,
         builder: (context, _) => MaterialApp(
-          title: 'جري جدة',
+          title: 'لفّة',
           debugShowCheckedModeBanner: false,
           locale: const Locale('ar'),
           supportedLocales: const [Locale('ar')],

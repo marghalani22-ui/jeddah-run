@@ -33,7 +33,7 @@ LocationSettings runSettings() => AndroidSettings(
       distanceFilter: 0,
       intervalDuration: const Duration(seconds: 1),
       foregroundNotificationConfig: const ForegroundNotificationConfig(
-        notificationTitle: 'جري جدة',
+        notificationTitle: 'لفّة',
         notificationText: 'نسجّل جولتك الحين',
         enableWakeLock: true,
         setOngoing: true,
