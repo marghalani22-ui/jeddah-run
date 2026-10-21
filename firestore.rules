@@ -70,6 +70,13 @@ service cloud.firestore {
       }
     }
 
+    // Abuse reports: write-only from the app, reviewed in the console.
+    match /reports/{id} {
+      allow create: if signedIn() && request.resource.data.from == request.auth.uid
+        && request.resource.data.reason is string && request.resource.data.reason.size() <= 40
+        && request.resource.data.note is string && request.resource.data.note.size() <= 500;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

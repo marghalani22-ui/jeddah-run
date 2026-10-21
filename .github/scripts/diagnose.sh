@@ -28,9 +28,9 @@ PY
 }
 # first launch: onboarding
 adb shell am start -W -n $PKG/.MainActivity > diag/start1.txt 2>&1
-sleep 12; adb exec-out screencap -p > diag/ob-1.png
-tap_label 'يلا نبدأ' 89;        sleep 3; adb exec-out screencap -p > diag/ob-2.png
-tap_label 'التالي' 89;          sleep 3; adb exec-out screencap -p > diag/ob-3.png
+sleep 15; adb exec-out screencap -p > diag/ob-1.png
+tap_label 'يلا نبدأ' 92;        sleep 4; adb exec-out screencap -p > diag/ob-2.png
+tap_label 'التالي' 92;          sleep 4; adb exec-out screencap -p > diag/ob-3.png
 tap_label 'اسمح بالموقع' 83;    sleep 4; adb exec-out screencap -p > diag/ob-4.png
 tap_label 'فعّل التذكيرات' 83;  sleep 5; adb exec-out screencap -p > diag/1-home.png
 adb shell dumpsys meminfo $PKG | head -40 > diag/meminfo.txt

@@ -6,6 +6,7 @@ import '../state/runs.dart';
 import '../state/settings.dart';
 import '../theme/tokens.dart';
 import '../widgets/common.dart';
+import 'heatmap_screen.dart';
 import 'summary_screen.dart';
 
 class LogScreen extends StatelessWidget {
@@ -70,6 +71,22 @@ class _Log extends StatelessWidget {
             const SectionHead('آخر 8 أسابيع', trailing: 'كم'),
             SizedBox(height: 140, child: CustomPaint(size: Size.infinite, painter: _Bars(weeks, goal.toDouble(), p))),
           ]),
+        ),
+      ),
+      Card(
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: Gap.l, vertical: 6),
+          leading: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(gradient: Grad.night, borderRadius: BorderRadius.circular(14)),
+            child: const Icon(Icons.local_fire_department_rounded, color: Brand.coral),
+          ),
+          title: const Text('خريطة مساراتي', style: TextStyle(fontWeight: FontWeight.w700)),
+          subtitle: Text('كل جولاتك على خريطة وحدة، وشوارعك المفضلة تولّع', style: TextStyle(color: p.muted, fontSize: 12.5)),
+          trailing: Icon(Icons.chevron_left_rounded, color: p.muted),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const HeatmapScreen())),
         ),
       ),
       Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [

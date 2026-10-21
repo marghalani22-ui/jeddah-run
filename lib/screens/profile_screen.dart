@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/cloud.dart';
 import '../services/health_sync.dart';
 import '../services/reminders.dart';
+import 'account_screen.dart';
 import 'connections_screen.dart';
 import '../state/game.dart';
 import '../state/phase.dart';
@@ -207,6 +208,10 @@ class ProfileScreen extends StatelessWidget {
             Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               const SectionHead('المظهر'),
               const _LookPicker(),
+            ]),
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              const SectionHead('الحساب والخصوصية'),
+              const AccountSection(),
             ]),
           ]);
         },

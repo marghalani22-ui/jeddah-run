@@ -71,6 +71,7 @@ class Social extends ChangeNotifier {
   Map<String, ChatInfo> chats = {};
   final Map<String, Profile> profiles = {};
   Map<String, int> _lastRead = {};
+  Set<String> blocked = {};
 
   StreamSubscription? _subF, _subC, _subP;
   String? _bound;
@@ -100,6 +101,10 @@ class Social extends ChangeNotifier {
       return;
     }
     try {
+      final u = await _db.collection('users').doc(uid).get();
+      blocked = ((u.data()?['blocked'] as List?) ?? const []).cast<String>().toSet();
+    } catch (_) {}
+    try {
       final sp = await SharedPreferences.getInstance();
       _lastRead = (jsonDecode(sp.getString('lastRead') ?? '{}') as Map).map((k, v) => MapEntry(k as String, v as int));
     } catch (_) {}
@@ -108,7 +113,12 @@ class Social extends ChangeNotifier {
       notifyListeners();
     }, onError: (e) => debugPrint('profile: $e'));
     _subF = _db.collection('friendships').where('members', arrayContains: uid).snapshots().listen((s) {
-      friendships = s.docs.map((d) => Friendship(d.id, d.data(), uid)).toList();
+      final all = s.docs.map((d) => Friendship(d.id, d.data(), uid)).toList();
+      // Anything from a blocked runner is dropped silently.
+      for (final f in all.where((f) => blocked.contains(f.other))) {
+        remove(f).catchError((_) {});
+      }
+      friendships = all.where((f) => !blocked.contains(f.other)).toList();
       for (final f in friendships) {
         _loadProfile(f.other);
       }
@@ -189,6 +199,7 @@ class Social extends ChangeNotifier {
       final other = u.data()?['uid'] as String?;
       if (other == null) return 'ما لقينا أحد بهذا الاسم';
       if (other == uid) return 'هذا اسمك أنت';
+      if (blocked.contains(other)) return 'هذا الشخص محظور عندك، فك الحظر أول من ملفي';
       final id = pairId(uid, other);
       Friendship? existing;
       for (final f in friendships) {
@@ -223,6 +234,45 @@ class Social extends ChangeNotifier {
       _db.collection('friendships').doc(f.id).update({'status': 'accepted', 'acceptedAt': FieldValue.serverTimestamp()});
 
   Future<void> remove(Friendship f) => _db.collection('friendships').doc(f.id).delete();
+
+  /// Block: ends the friendship (so the chat closes) and remembers the uid on our private doc.
+  Future<void> block(String other) async {
+    final uid = me;
+    if (uid == null) return;
+    blocked.add(other);
+    friendships.removeWhere((f) => f.other == other);
+    notifyListeners();
+    await _db.collection('users').doc(uid).set({'blocked': FieldValue.arrayUnion([other])}, SetOptions(merge: true));
+    await _db.collection('friendships').doc(pairId(uid, other)).delete().catchError((_) {});
+  }
+
+  Future<void> unblock(String other) async {
+    final uid = me;
+    if (uid == null) return;
+    blocked.remove(other);
+    notifyListeners();
+    await _db.collection('users').doc(uid).set({'blocked': FieldValue.arrayRemove([other])}, SetOptions(merge: true));
+  }
+
+  /// Report goes to reports/ for review; only the reporter can write it, nobody can read it from the app.
+  Future<bool> report(String other, String reason, {String? note}) async {
+    final uid = me;
+    if (uid == null) return false;
+    try {
+      await _db.collection('reports').add({
+        'from': uid,
+        'about': other,
+        'chat': pairId(uid, other),
+        'reason': reason,
+        'note': (note ?? '').trim(),
+        'at': FieldValue.serverTimestamp(),
+      });
+      return true;
+    } catch (e) {
+      debugPrint('report: $e');
+      return false;
+    }
+  }
 
   Stream<List<Message>> messages(String chatId) => _db
       .collection('chats')

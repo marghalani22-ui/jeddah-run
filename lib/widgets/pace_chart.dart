@@ -19,7 +19,7 @@ class PaceChart extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(Gap.m, Gap.l, Gap.m, Gap.s),
         child: Column(children: [
-          SizedBox(height: 150, child: CustomPaint(size: Size.infinite, painter: _PacePainter(splits, avg, p))),
+          SizedBox(height: 150, child: CustomPaint(size: Size.infinite, painter: _PacePainter(splits, avg, p, DefaultTextStyle.of(context).style.fontFamily))),
           const SizedBox(height: Gap.xs),
           Row(children: [
             Container(width: 14, height: 2, color: p.muted),
@@ -37,8 +37,9 @@ class PaceChart extends StatelessWidget {
 }
 
 class _PacePainter extends CustomPainter {
-  _PacePainter(this.v, this.avg, this.p);
+  _PacePainter(this.v, this.avg, this.p, this.font);
   final List<int> v;
+  final String? font;
   final double avg;
   final Palette p;
 
@@ -105,7 +106,7 @@ class _PacePainter extends CustomPainter {
 
   void _text(Canvas c, String t, Offset at, Color color, double size, FontWeight weight) {
     final tp = TextPainter(
-      text: TextSpan(text: t, style: TextStyle(fontSize: size, fontWeight: weight, color: color)),
+      text: TextSpan(text: t, style: TextStyle(fontFamily: font, fontSize: size, fontWeight: weight, color: color)),
       textDirection: TextDirection.ltr,
     )..layout();
     tp.paint(c, Offset(at.dx - tp.width / 2, at.dy));

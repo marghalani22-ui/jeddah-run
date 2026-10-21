@@ -43,6 +43,60 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  Future<void> _block(String name) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text('تحظر $name؟'),
+        content: const Text('تنحذف الصداقة وتنقفل المحادثة، وما يقدر يرسل لك طلب مرة ثانية. تقدر تفك الحظر من ملفي.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('إلغاء')),
+          TextButton(onPressed: () => Navigator.pop(c, true), child: Text('حظر', style: TextStyle(color: context.pal.bad))),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    await social.block(widget.otherUid);
+    if (mounted) Navigator.pop(context);
+  }
+
+  Future<void> _report() async {
+    const reasons = ['رسائل مزعجة', 'إساءة أو تنمّر', 'محتوى غير لائق', 'انتحال شخصية', 'شي ثاني'];
+    String? reason;
+    final note = TextEditingController();
+    final send = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (c) => StatefulBuilder(
+        builder: (c, set) => Padding(
+          padding: EdgeInsets.fromLTRB(Gap.l, 0, Gap.l, MediaQuery.of(c).viewInsets.bottom + Gap.l),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Text('إبلاغ عن المحادثة', style: Theme.of(c).textTheme.titleLarge),
+            const SizedBox(height: Gap.xs),
+            Text('نراجع البلاغ بسرية، وما يوصله أي تنبيه.', style: TextStyle(color: c.pal.muted, fontSize: 13)),
+            const SizedBox(height: Gap.m),
+            Wrap(spacing: Gap.s, runSpacing: Gap.s, children: [
+              for (final r in reasons) ChoiceChip(label: Text(r), selected: reason == r, onSelected: (_) => set(() => reason = r)),
+            ]),
+            const SizedBox(height: Gap.m),
+            TextField(controller: note, maxLength: 500, maxLines: 3, decoration: const InputDecoration(hintText: 'تفاصيل (اختياري)', border: OutlineInputBorder())),
+            const SizedBox(height: Gap.s),
+            FilledButton(
+              style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(50), backgroundColor: c.pal.bad),
+              onPressed: reason == null ? null : () => Navigator.pop(c, true),
+              child: const Text('أرسل البلاغ'),
+            ),
+          ]),
+        ),
+      ),
+    );
+    if (send != true || reason == null) return;
+    final ok = await social.report(widget.otherUid, reason!, note: note.text);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ok ? 'وصلنا البلاغ، شكراً لك' : 'ما انرسل البلاغ، جرّب مرة ثانية')));
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
@@ -50,6 +104,16 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 0,
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert_rounded),
+            onSelected: (v) => v == 'report' ? _report() : _block(prof?.name ?? 'هذا الشخص'),
+            itemBuilder: (_) => [
+              const PopupMenuItem(value: 'report', child: ListTile(leading: Icon(Icons.flag_outlined), title: Text('إبلاغ'))),
+              PopupMenuItem(value: 'block', child: ListTile(leading: Icon(Icons.block_rounded, color: p.bad), title: Text('حظر', style: TextStyle(color: p.bad)))),
+            ],
+          ),
+        ],
         title: Row(children: [
           CircleAvatar(radius: 18, backgroundColor: Brand.coral, child: Text((prof?.name ?? '؟').characters.first, style: const TextStyle(color: Colors.white))),
           const SizedBox(width: Gap.s),

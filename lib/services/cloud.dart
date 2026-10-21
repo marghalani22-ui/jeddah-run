@@ -5,6 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../state/game.dart';
 
 import '../state/runs.dart';
 import '../state/settings.dart';
@@ -79,6 +82,59 @@ class Cloud extends ChangeNotifier {
     } catch (_) {}
     user = null;
     notifyListeners();
+  }
+
+  /// Removes everything we keep about this user on the server and on this phone.
+  /// Returns null on success, or a message to show.
+  Future<String?> deleteAccount() async {
+    final u = FirebaseAuth.instance.currentUser;
+    busy = true;
+    notifyListeners();
+    try {
+      if (u != null) {
+        final uid = u.uid;
+        final runs = await _runs(uid).get();
+        for (var i = 0; i < runs.docs.length; i += 400) {
+          final b = _db.batch();
+          for (final d in runs.docs.skip(i).take(400)) {
+            b.delete(d.reference);
+          }
+          await b.commit();
+        }
+        final fr = await _db.collection('friendships').where('members', arrayContains: uid).get();
+        for (final d in fr.docs) {
+          await d.reference.delete();
+        }
+        final code = social.mine?.code ?? '';
+        if (code.isNotEmpty) await _db.collection('usernames').doc(code).delete().catchError((_) {});
+        await _db.collection('profiles').doc(uid).delete();
+        await _db.collection('users').doc(uid).delete();
+        try {
+          await u.delete();
+        } on FirebaseAuthException catch (e) {
+          if (e.code != 'requires-recent-login') rethrow;
+          final acc = await GoogleSignIn.instance.authenticate();
+          await u.reauthenticateWithCredential(GoogleAuthProvider.credential(idToken: acc.authentication.idToken));
+          await u.delete();
+        }
+        try {
+          await GoogleSignIn.instance.signOut();
+        } catch (_) {}
+      }
+      runStore.onChange = null;
+      final sp = await SharedPreferences.getInstance();
+      await sp.clear();
+      await Future.wait([settings.load(), runStore.load(), game.load()]);
+      runStore.onChange = _push;
+      user = null;
+      return null;
+    } catch (e) {
+      debugPrint('delete account: $e');
+      return 'ما قدرنا نحذف الحساب كامل، تأكد من النت وجرّب مرة ثانية';
+    } finally {
+      busy = false;
+      notifyListeners();
+    }
   }
 
   CollectionReference<Map<String, dynamic>> _runs(String uid) => _db.collection('users').doc(uid).collection('runs');
