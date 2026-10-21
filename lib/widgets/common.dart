@@ -114,3 +114,43 @@ class PageBody extends StatelessWidget {
         ),
       );
 }
+
+/// Progress ring in the sunset gradient.
+class Ring extends StatelessWidget {
+  const Ring({super.key, required this.value, this.size = 120, this.stroke = 12, this.child});
+  final double value, size, stroke;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: size,
+        height: size,
+        child: CustomPaint(painter: _RingPainter(value.clamp(0, 1).toDouble(), stroke, context.pal.sand2), child: Center(child: child)),
+      );
+}
+
+class _RingPainter extends CustomPainter {
+  _RingPainter(this.v, this.w, this.track);
+  final double v, w;
+  final Color track;
+
+  @override
+  void paint(Canvas canvas, Size s) {
+    final r = Rect.fromLTWH(w / 2, w / 2, s.width - w, s.height - w);
+    final pt = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = w
+      ..strokeCap = StrokeCap.round;
+    canvas.drawArc(r, 0, 6.2832, false, pt..color = track);
+    if (v <= 0) return;
+    pt.shader = const SweepGradient(
+      startAngle: -1.5708,
+      endAngle: 4.7124,
+      colors: [Color(0xFFFFB81C), Color(0xFFF25C2C)],
+    ).createShader(r);
+    canvas.drawArc(r, -1.5708, 6.2832 * v, false, pt);
+  }
+
+  @override
+  bool shouldRepaint(_RingPainter o) => o.v != v || o.track != track;
+}

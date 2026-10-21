@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import '../state/runs.dart';
 import '../theme/tokens.dart';
 import '../widgets/brand_mark.dart';
+import '../widgets/gradient_button.dart';
 import '../widgets/route_painter.dart';
 
 enum _Tpl { photo, map, sticker, minimal }
@@ -178,13 +179,7 @@ class _ShareScreenState extends State<ShareScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.all(Gap.l),
-                child: FilledButton.icon(
-                  onPressed: _busy ? null : _share,
-                  icon: _busy
-                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Icon(Icons.ios_share),
-                  label: const Text('مشاركة'),
-                ),
+                child: GradientButton(onPressed: _share, busy: _busy, icon: Icons.ios_share, label: 'مشاركة'),
               ),
             ]),
           ),

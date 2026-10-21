@@ -53,8 +53,8 @@ class Palette extends ThemeExtension<Palette> {
 
   static const night = Palette(
     sand: Color(0xFF0E1525),
-    sand2: Color(0xFF1A2440),
-    card: Color(0xFF17213A),
+    sand2: Color(0xFF22335A),
+    card: Color(0xFF17223D),
     ink: Color(0xFFEEF2FA),
     muted: Color(0xFFA3AEC6),
     edge: Color(0xFF26314E),
@@ -105,4 +105,12 @@ class Radii {
 
 extension PaletteX on BuildContext {
   Palette get pal => Theme.of(this).extension<Palette>()!;
+}
+
+/// Brand gradients (from the share templates).
+class Grad {
+  static const sunset = LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFFF25C2C), Color(0xFFFFB81C)]);
+  static const night = LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFF22335A), Color(0xFF0E1525)]);
+  static const sea = LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFF0B6E8A), Color(0xFF12A4B8)]);
+  static const purple = LinearGradient(begin: Alignment.topRight, end: Alignment.bottomLeft, colors: [Color(0xFF4B2FC9), Color(0xFFB04BD9)]);
 }

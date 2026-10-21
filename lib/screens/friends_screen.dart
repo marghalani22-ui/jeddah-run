@@ -6,6 +6,7 @@ import '../services/social.dart';
 import '../state/runs.dart';
 import '../theme/tokens.dart';
 import '../widgets/common.dart';
+import '../widgets/gradient_button.dart';
 import 'chat_screen.dart';
 
 /// Friends tab: your @username, add by username, requests, and a weekly
@@ -24,10 +25,11 @@ class FriendsScreen extends StatelessWidget {
                 title: 'جري أحلى مع أصحابك',
                 hint: 'سجّل دخول بحساب قوقل عشان تضيف أصحابك، تشوف ترتيبكم كل أسبوع، وتسولفون.',
               ),
-              FilledButton.icon(
-                onPressed: cloud.busy || !cloud.ready ? null : () => cloud.signIn(),
-                icon: const Icon(Icons.login),
-                label: const Text('الدخول بحساب قوقل'),
+              GradientButton(
+                onPressed: !cloud.ready ? null : () => cloud.signIn(),
+                busy: cloud.busy,
+                icon: Icons.login,
+                label: 'الدخول بحساب قوقل',
               ),
             ]);
           }
@@ -137,7 +139,7 @@ class _FriendsState extends State<_Friends> {
         Container(
           padding: const EdgeInsets.all(Gap.l),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [Color(0xFF22335A), Color(0xFF0E1525)], begin: Alignment.topRight, end: Alignment.bottomLeft),
+            gradient: Grad.night,
             borderRadius: BorderRadius.circular(Radii.card),
           ),
           child: Row(children: [

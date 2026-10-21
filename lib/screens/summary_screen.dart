@@ -5,6 +5,7 @@ import '../state/runs.dart';
 import '../theme/tokens.dart';
 import '../widgets/common.dart';
 import '../widgets/jmap.dart';
+import '../widgets/gradient_button.dart';
 import 'share_screen.dart';
 
 /// Run summary: route on the real map, the numbers, and points earned.
@@ -125,7 +126,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
           _Splits(run: r),
         ],
         const SizedBox(height: Gap.xl),
-        FilledButton.icon(onPressed: _openShare, icon: const Icon(Icons.ios_share), label: const Text('شارك جولتك')),
+        GradientButton(onPressed: _openShare, icon: Icons.ios_share, label: 'شارك جولتك'),
         if (widget.fresh) ...[
           const SizedBox(height: Gap.s),
           OutlinedButton(

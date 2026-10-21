@@ -36,30 +36,32 @@ class _Log extends StatelessWidget {
     final weeks = runStore.lastWeeks(8);
 
     return PageBody(title: 'سجلّي', children: [
-      Card(
-        child: Padding(
-          padding: const EdgeInsets.all(Gap.l),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('هذا الأسبوع', style: Theme.of(context).textTheme.bodySmall),
-            Text.rich(TextSpan(children: [
-              TextSpan(text: fmtKm(wkKm), style: TextStyle(fontSize: 38, fontWeight: FontWeight.w700, color: p.ink)),
-              TextSpan(text: ' كم', style: TextStyle(fontSize: 14, color: p.muted)),
-            ])),
-            const SizedBox(height: Gap.m),
-            Bar(value: wkKm / goal),
-            const SizedBox(height: 6),
-            Text(
-              wkKm >= goal ? 'حققت هدفك ($goal كم)' : 'باقي ${fmtKm(goal - wkKm)} كم على هدفك ($goal كم)',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: Gap.l),
-            Row(children: [
-              Kpi(value: '${week.length}', label: 'جولات'),
-              Kpi(value: fmtDur(wkSecs), label: 'الزمن'),
-              Kpi(value: fmtPace(wkKm > 0 ? wkSecs / wkKm : 0), unit: '/كم', label: 'السرعة'),
-            ]),
+      Container(
+        padding: const EdgeInsets.all(Gap.l + 2),
+        decoration: BoxDecoration(gradient: Grad.sunset, borderRadius: BorderRadius.circular(26)),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('هذا الأسبوع', style: TextStyle(color: Color(0xE6FFFFFF), fontSize: 13, fontWeight: FontWeight.w500)),
+          Text.rich(TextSpan(children: [
+            TextSpan(text: fmtKm(wkKm), style: const TextStyle(fontSize: 46, fontWeight: FontWeight.w700, color: Colors.white, height: 1.1)),
+            const TextSpan(text: ' كم', style: TextStyle(fontSize: 16, color: Color(0xE6FFFFFF))),
+          ])),
+          const SizedBox(height: Gap.m),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(value: (wkKm / goal).clamp(0, 1).toDouble(), minHeight: 8, color: Colors.white, backgroundColor: const Color(0x40FFFFFF)),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            wkKm >= goal ? 'حققت هدفك ($goal كم) 🎉' : 'باقي ${fmtKm(goal - wkKm)} كم على هدفك ($goal كم)',
+            style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: Gap.l),
+          Row(children: [
+            _HeroStat(value: '${week.length}', label: 'جولات'),
+            _HeroStat(value: fmtDur(wkSecs), label: 'الزمن'),
+            _HeroStat(value: fmtPace(wkKm > 0 ? wkSecs / wkKm : 0), label: 'لكل كم'),
           ]),
-        ),
+        ]),
       ),
       Card(
         child: Padding(
@@ -149,4 +151,17 @@ class _Bars extends CustomPainter {
 
   @override
   bool shouldRepaint(_Bars o) => true;
+}
+
+class _HeroStat extends StatelessWidget {
+  const _HeroStat({required this.value, required this.label});
+  final String value, label;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+        child: Column(children: [
+          Text(value, style: const TextStyle(color: Colors.white, fontSize: 21, fontWeight: FontWeight.w700)),
+          Text(label, style: const TextStyle(color: Color(0xD9FFFFFF), fontSize: 12)),
+        ]),
+      );
 }

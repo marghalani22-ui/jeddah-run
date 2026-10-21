@@ -5,7 +5,10 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 import '../services/location.dart';
 import '../state/runs.dart';
 import '../state/settings.dart';
+import '../state/mood.dart';
 import '../theme/tokens.dart';
+import '../widgets/common.dart';
+import '../widgets/gradient_button.dart';
 import '../widgets/jmap.dart';
 import 'run_screen.dart';
 
@@ -58,79 +61,127 @@ class _MapScreenState extends State<MapScreen> {
         left: 0,
         right: 0,
         child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(Gap.l),
-          child: ListenableBuilder(
-            listenable: Listenable.merge([runStore, settings]),
-            builder: (context, _) => Row(children: [
-              _Chip(icon: Icons.local_fire_department, text: '${runStore.streak}', color: Brand.coral, tip: 'أيام متتالية'),
-              const SizedBox(width: Gap.s),
-              _Chip(icon: Icons.toll, text: '${runStore.points}', color: Brand.sun, tip: 'نقاطك'),
-              const SizedBox(width: Gap.s),
-              _Chip(
-                icon: Icons.flag_outlined,
-                text: '${fmtKm(runStore.weekKm)} / ${settings.goalKm} كم',
-                color: Brand.leaf,
-                tip: 'هدف الأسبوع',
-              ),
-            ]),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(Gap.m, Gap.m, Gap.m, 0),
+            child: ListenableBuilder(
+              listenable: Listenable.merge([runStore, settings]),
+              builder: (context, _) => const _Header(),
+            ),
           ),
         ),
       ),
-      ),
       Positioned(
-        left: Gap.l,
-        right: Gap.l,
-        bottom: Gap.l,
-        child: Row(children: [
-          Expanded(
-            child: FilledButton.icon(
-              onPressed: _start,
-              icon: const Icon(Icons.directions_run),
-              label: const Text('ابدأ جولة'),
-            ),
+        left: Gap.m,
+        right: Gap.m,
+        bottom: Gap.m,
+        child: ListenableBuilder(
+          listenable: Listenable.merge([runStore, settings]),
+          builder: (context, _) => _WeekCard(onStart: _start, onRecenter: _recenter),
+        ),
+      ),
+    ]);
+  }
+}
+
+class _Header extends StatelessWidget {
+  const _Header();
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.pal;
+    final (mood, line) = moodNow();
+    return Row(children: [
+      Expanded(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(10, 8, 14, 8),
+          decoration: BoxDecoration(
+            color: p.card,
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: const [BoxShadow(color: Color(0x1F14213D), blurRadius: 18, offset: Offset(0, 6))],
           ),
-          const SizedBox(width: Gap.m),
-          SizedBox(
-            width: 52,
-            height: 52,
-            child: IconButton.filledTonal(
-              onPressed: _recenter,
-              icon: const Icon(Icons.my_location),
-              tooltip: 'موقعي',
+          child: Row(children: [
+            Image.asset(moodAsset(mood), width: 44, height: 44),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+                Text(greeting(), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: p.ink)),
+                Text(line, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.5, color: p.muted)),
+              ]),
             ),
-          ),
+          ]),
+        ),
+      ),
+      const SizedBox(width: Gap.s),
+      Container(
+        height: 60,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(gradient: Grad.night, borderRadius: BorderRadius.circular(22)),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          const Icon(Icons.toll, color: Brand.sun, size: 20),
+          const SizedBox(width: 6),
+          Text('${runStore.points}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
         ]),
       ),
     ]);
   }
 }
 
-class _Chip extends StatelessWidget {
-  const _Chip({required this.icon, required this.text, required this.color, required this.tip});
-  final IconData icon;
-  final String text, tip;
-  final Color color;
+class _WeekCard extends StatelessWidget {
+  const _WeekCard({required this.onStart, required this.onRecenter});
+  final VoidCallback onStart, onRecenter;
 
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
-    return Tooltip(
-      message: tip,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: p.card.withValues(alpha: .94),
-          borderRadius: BorderRadius.circular(Radii.chip),
-          border: Border.all(color: p.edge),
-          boxShadow: const [BoxShadow(color: Color(0x1A14213D), blurRadius: 10, offset: Offset(0, 3))],
+    final goal = settings.goalKm.toDouble(), wk = runStore.weekKm;
+    final left = goal - wk;
+    return Column(crossAxisAlignment: CrossAxisAlignment.end, mainAxisSize: MainAxisSize.min, children: [
+      Padding(
+        padding: const EdgeInsets.only(bottom: Gap.s),
+        child: Material(
+          color: p.card,
+          shape: const CircleBorder(),
+          elevation: 3,
+          shadowColor: const Color(0x3314213D),
+          child: IconButton(onPressed: onRecenter, icon: Icon(Icons.my_location, color: p.ink), tooltip: 'موقعي'),
         ),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(icon, size: 18, color: color),
-          const SizedBox(width: 6),
-          Text(text, style: TextStyle(fontWeight: FontWeight.w700, color: p.ink, fontSize: 13.5)),
+      ),
+      Container(
+        padding: const EdgeInsets.all(Gap.l),
+        decoration: BoxDecoration(
+          color: p.card,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: const [BoxShadow(color: Color(0x2914213D), blurRadius: 30, offset: Offset(0, 10))],
+        ),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Row(children: [
+            Ring(
+              value: goal == 0 ? 0 : wk / goal,
+              size: 76,
+              stroke: 9,
+              child: Text('${(goal == 0 ? 0 : (wk / goal * 100).clamp(0, 999)).round()}%',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17, color: p.ink)),
+            ),
+            const SizedBox(width: Gap.l),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('هدف الأسبوع', style: TextStyle(fontSize: 12.5, color: p.muted)),
+                Text.rich(TextSpan(children: [
+                  TextSpan(text: fmtKm(wk), style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: p.ink, height: 1.1)),
+                  TextSpan(text: '  من ${settings.goalKm} كم', style: TextStyle(fontSize: 14, color: p.muted)),
+                ])),
+                const SizedBox(height: 2),
+                Text(
+                  left <= 0 ? 'حققت هدفك! كل كيلو زيادة مكسب' : 'باقي ${fmtKm(left)} كم · تقدر عليها!',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: p.good),
+                ),
+              ]),
+            ),
+          ]),
+          const SizedBox(height: Gap.l),
+          GradientButton(label: 'ابدأ جولة', icon: Icons.play_arrow_rounded, onPressed: onStart, height: 58),
         ]),
       ),
-    );
+    ]);
   }
 }

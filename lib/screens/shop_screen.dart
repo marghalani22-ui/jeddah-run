@@ -14,7 +14,7 @@ class ShopScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFF22335A), Brand.navy], begin: Alignment.topRight, end: Alignment.bottomLeft),
+              gradient: Grad.night,
               borderRadius: BorderRadius.circular(Radii.card),
             ),
             child: Row(children: [

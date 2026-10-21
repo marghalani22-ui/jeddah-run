@@ -269,10 +269,9 @@ class _RunScreenState extends State<RunScreen> {
               ]),
             ),
             Container(
-              decoration: BoxDecoration(
-                color: p.card,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(Radii.sheet)),
-                boxShadow: const [BoxShadow(color: Color(0x2214213D), blurRadius: 20, offset: Offset(0, -4))],
+              decoration: const BoxDecoration(
+                gradient: Grad.night,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
               ),
               padding: const EdgeInsets.fromLTRB(Gap.l, Gap.l, Gap.l, Gap.l),
               child: SafeArea(
@@ -287,25 +286,50 @@ class _RunScreenState extends State<RunScreen> {
                             height: 26,
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             alignment: Alignment.center,
-                            decoration: BoxDecoration(color: p.sunSoft, borderRadius: BorderRadius.circular(Radii.chip)),
-                            child: Text(status, style: TextStyle(color: p.goldInk, fontWeight: FontWeight.w600, fontSize: 12.5)),
+                            decoration: BoxDecoration(color: const Color(0x33FFB81C), borderRadius: BorderRadius.circular(Radii.chip)),
+                            child: Text(status, style: const TextStyle(color: Color(0xFFFFD27A), fontWeight: FontWeight.w600, fontSize: 12.5)),
                           ),
                   ),
-                  const SizedBox(height: Gap.s),
-                  Text(fmtKm(km), style: TextStyle(fontSize: 64, fontWeight: FontWeight.w700, height: 1, color: p.ink)),
-                  Text('كيلومتر', style: TextStyle(color: p.muted, fontSize: 13)),
+                  Text(fmtKm(km), style: const TextStyle(fontSize: 92, fontWeight: FontWeight.w700, height: 1.05, color: Colors.white, letterSpacing: -1)),
+                  const Text('كيلومتر', style: TextStyle(color: Color(0xFFA3AEC6), fontSize: 14)),
                   const SizedBox(height: Gap.l),
                   Row(children: [
                     _Stat(value: fmtDur(secs), label: 'الزمن'),
-                    _Stat(value: fmtPace(km > 0.05 ? secs / km : 0), label: 'السرعة /كم'),
-                    _Stat(value: '${(km * pointsPerKm).floor()}', label: 'نقاط'),
+                    _Stat(value: fmtPace(km > 0.05 ? secs / km : 0), label: 'لكل كم'),
+                    _Stat(value: '+${(km * pointsPerKm).floor()}', label: 'نقطة', color: Brand.sun),
                   ]),
+                  if (_splits.isNotEmpty) ...[
+                    const SizedBox(height: Gap.m),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(color: const Color(0xFF1E2D4F), borderRadius: BorderRadius.circular(18)),
+                      child: Row(children: [
+                        const Text('آخر كيلو', style: TextStyle(color: Color(0xFFA3AEC6), fontSize: 13.5)),
+                        const Spacer(),
+                        Text(fmtPace(_splits.last.toDouble()), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
+                        if (_splits.length > 1) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            _splits.last <= _splits[_splits.length - 2]
+                                ? 'أسرع بـ ${_splits[_splits.length - 2] - _splits.last} ث'
+                                : 'أبطأ بـ ${_splits.last - _splits[_splits.length - 2]} ث',
+                            style: TextStyle(
+                              color: _splits.last <= _splits[_splits.length - 2] ? const Color(0xFF4ADE8B) : const Color(0xFFFF9A6B),
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ]),
+                    ),
+                  ],
                   const SizedBox(height: Gap.xl),
                   Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                     _RoundBtn(
                       icon: _phase == _Phase.paused ? Icons.play_arrow_rounded : Icons.pause_rounded,
                       label: _phase == _Phase.paused ? 'كمّل' : 'إيقاف مؤقت',
-                      color: _phase == _Phase.paused ? Brand.leaf : Brand.navy,
+                      color: _phase == _Phase.paused ? Brand.leaf : Colors.white,
+                      iconColor: _phase == _Phase.paused ? Colors.white : Brand.navy,
                       onTap: _phase == _Phase.countdown ? null : _togglePause,
                     ),
                     const SizedBox(width: Gap.xxl),
@@ -318,7 +342,7 @@ class _RunScreenState extends State<RunScreen> {
           if (_phase == _Phase.countdown)
             Positioned.fill(
               child: ColoredBox(
-                color: Brand.navy.withValues(alpha: .88),
+                color: const Color(0xF20E1525),
                 child: Center(
                   child: Column(mainAxisSize: MainAxisSize.min, children: [
                     AnimatedSwitcher(
@@ -364,20 +388,22 @@ class _Pill extends StatelessWidget {
 }
 
 class _Stat extends StatelessWidget {
-  const _Stat({required this.value, required this.label});
+  const _Stat({required this.value, required this.label, this.color = Colors.white});
   final String value, label;
+  final Color color;
 
   @override
   Widget build(BuildContext context) => Expanded(
         child: Column(children: [
-          Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: context.pal.ink)),
-          Text(label, style: TextStyle(fontSize: 12, color: context.pal.muted)),
+          Text(value, style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: color)),
+          Text(label, style: const TextStyle(fontSize: 12.5, color: Color(0xFFA3AEC6))),
         ]),
       );
 }
 
 class _RoundBtn extends StatelessWidget {
-  const _RoundBtn({required this.icon, required this.label, required this.color, required this.onTap});
+  const _RoundBtn({required this.icon, required this.label, required this.color, required this.onTap, this.iconColor = Colors.white});
+  final Color iconColor;
   final IconData icon;
   final String label;
   final Color color;
@@ -391,10 +417,10 @@ class _RoundBtn extends StatelessWidget {
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: onTap,
-            child: SizedBox(width: 76, height: 76, child: Icon(icon, color: Colors.white, size: 38)),
+            child: SizedBox(width: 80, height: 80, child: Icon(icon, color: iconColor, size: 38)),
           ),
         ),
         const SizedBox(height: 6),
-        Text(label, style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: context.pal.muted)),
+        Text(label, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: Color(0xFFA3AEC6))),
       ]);
 }

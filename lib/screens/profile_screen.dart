@@ -6,6 +6,7 @@ import '../state/runs.dart';
 import '../state/settings.dart';
 import '../theme/tokens.dart';
 import '../widgets/common.dart';
+import '../widgets/gradient_button.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -36,10 +37,16 @@ class ProfileScreen extends StatelessWidget {
           return PageBody(title: 'ملفي', children: [
             const _AccountCard(),
             Column(children: [
-              CircleAvatar(
-                radius: 44,
-                backgroundColor: Brand.coral,
-                child: Text(name.characters.first, style: const TextStyle(fontSize: 38, color: Colors.white, fontWeight: FontWeight.w600)),
+              Container(
+                width: 96,
+                height: 96,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  gradient: Grad.sunset,
+                  shape: BoxShape.circle,
+                  boxShadow: [BoxShadow(color: Color(0x40F25C2C), blurRadius: 20, offset: Offset(0, 8))],
+                ),
+                child: Text(name.characters.first, style: const TextStyle(fontSize: 40, color: Colors.white, fontWeight: FontWeight.w700)),
               ),
               const SizedBox(height: Gap.s),
               TextButton.icon(
@@ -206,12 +213,11 @@ class _AccountCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text('سجّل دخول عشان تنحفظ جولاتك ونقاطك ولا تضيع لو غيّرت جوالك.', style: Theme.of(context).textTheme.bodySmall),
                   const SizedBox(height: Gap.m),
-                  FilledButton.icon(
-                    onPressed: cloud.busy || !cloud.ready ? null : () => _signIn(context),
-                    icon: cloud.busy
-                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : const Icon(Icons.login),
-                    label: Text(cloud.ready ? 'الدخول بحساب قوقل' : 'الخدمة غير متاحة الحين'),
+                  GradientButton(
+                    onPressed: !cloud.ready ? null : () => _signIn(context),
+                    busy: cloud.busy,
+                    icon: Icons.login,
+                    label: cloud.ready ? 'الدخول بحساب قوقل' : 'الخدمة غير متاحة الحين',
                   ),
                 ]),
               ),
