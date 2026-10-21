@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:home_widget/home_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -46,11 +45,6 @@ class Reminders {
       tz.setLocalLocation(tz.getLocation('Asia/Riyadh'));
       await _n.initialize(const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher_monochrome')));
       _ready = true;
-      final sp = await SharedPreferences.getInstance();
-      if (!(sp.getBool('askedNotif') ?? false)) {
-        await sp.setBool('askedNotif', true);
-        await askPermission();
-      }
     } catch (e) {
       debugPrint('reminders init: $e');
     }

@@ -3,24 +3,51 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 
 import '../state/game.dart';
 import '../state/runs.dart';
+import '../state/settings.dart';
 import '../theme/tokens.dart';
 import '../widgets/common.dart';
 import '../widgets/jmap.dart';
+import '../widgets/celebration.dart';
 import '../widgets/gradient_button.dart';
+import '../widgets/pace_chart.dart';
 import 'share_screen.dart';
 
 /// Run summary: route on the real map, the numbers, and points earned.
 class SummaryScreen extends StatefulWidget {
-  const SummaryScreen({super.key, required this.run, this.fresh = false, this.rewards = const []});
+  const SummaryScreen({super.key, required this.run, this.fresh = false, this.rewards = const [], this.levelUp, this.goalReached = false});
   final Run run;
   final bool fresh;
   final List<Reward> rewards;
+  final int? levelUp;
+  final bool goalReached;
 
   @override
   State<SummaryScreen> createState() => _SummaryScreenState();
 }
 
 class _SummaryScreenState extends State<SummaryScreen> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.fresh) WidgetsBinding.instance.addPostFrameCallback((_) => _party());
+  }
+
+  /// Biggest moment first, one after another.
+  Future<void> _party() async {
+    await Future.delayed(const Duration(milliseconds: 600));
+    final lv = widget.levelUp;
+    if (lv != null && mounted) {
+      await celebrate(context, icon: Icons.military_tech_rounded, title: 'المستوى $lv', subtitle: 'صرت «${levelTitle(lv)}»', color: Brand.grape);
+    }
+    for (final b in widget.rewards.where((r) => r.kind == 'badge')) {
+      if (!mounted) return;
+      await celebrate(context, icon: b.icon, title: 'وسام جديد!', subtitle: '${b.label.replaceFirst('وسام: ', '')} · +${b.points} نقطة', color: Brand.sun);
+    }
+    if (widget.goalReached && mounted) {
+      await celebrate(context, icon: Icons.flag_rounded, title: 'هدف الأسبوع تم!', subtitle: '${fmtKm(runStore.weekKm)} كم من ${settings.goalKm} كم', color: Brand.leaf);
+    }
+  }
+
   MapLibreMapController? _map;
   late final List<LatLng> _pts = widget.run.path.map((e) => LatLng(e[0], e[1])).toList();
 
@@ -137,6 +164,11 @@ class _SummaryScreenState extends State<SummaryScreen> {
         ],
         if (r.splits.isNotEmpty) ...[
           const SizedBox(height: Gap.xl),
+          if (r.splits.length >= 2) ...[
+            const SectionHead('منحنى السرعة', trailing: 'دقيقة/كم'),
+            PaceChart(splits: r.splits),
+            const SizedBox(height: Gap.l),
+          ],
           const SectionHead('كل كيلو', trailing: 'الزمن'),
           _Splits(run: r),
         ],

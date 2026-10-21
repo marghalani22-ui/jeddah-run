@@ -13,6 +13,7 @@ import '../state/settings.dart';
 import '../theme/tokens.dart';
 import '../widgets/common.dart';
 import '../widgets/gradient_button.dart';
+import '../widgets/user_avatar.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -43,16 +44,21 @@ class ProfileScreen extends StatelessWidget {
           return PageBody(title: 'ملفي', children: [
             const _AccountCard(),
             Column(children: [
-              Container(
-                width: 96,
-                height: 96,
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  gradient: Grad.sunset,
-                  shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: Color(0x40F25C2C), blurRadius: 20, offset: Offset(0, 8))],
-                ),
-                child: Text(name.characters.first, style: const TextStyle(fontSize: 40, color: Colors.white, fontWeight: FontWeight.w700)),
+              GestureDetector(
+                onTap: () => pickProfilePhoto(context),
+                child: Stack(clipBehavior: Clip.none, children: [
+                  const UserAvatar(size: 96),
+                  PositionedDirectional(
+                    end: -2,
+                    bottom: -2,
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(color: p.card, shape: BoxShape.circle, border: Border.all(color: p.edge)),
+                      child: Icon(Icons.photo_camera_rounded, size: 17, color: p.ink),
+                    ),
+                  ),
+                ]),
               ),
               const SizedBox(height: Gap.s),
               TextButton.icon(

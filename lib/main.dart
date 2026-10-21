@@ -7,6 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'screens/friends_screen.dart';
 import 'screens/log_screen.dart';
 import 'screens/map_screen.dart';
+import 'screens/onboarding_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/shop_screen.dart';
 import 'services/cloud.dart';
@@ -41,7 +42,7 @@ class JeddahRunApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-        listenable: phaseClock,
+        listenable: Listenable.merge([phaseClock, settings]),
         builder: (context, _) => MaterialApp(
           title: 'لفّة',
           debugShowCheckedModeBanner: false,
@@ -55,7 +56,7 @@ class JeddahRunApp extends StatelessWidget {
           theme: buildTheme(paletteOf(phaseClock.phase), brightnessOf(phaseClock.phase)),
           themeAnimationDuration: const Duration(milliseconds: 900),
           themeAnimationCurve: Curves.easeInOut,
-          home: const Shell(),
+          home: settings.onboarded || runStore.runs.isNotEmpty ? const Shell() : const OnboardingScreen(),
         ),
       );
 }

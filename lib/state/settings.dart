@@ -11,6 +11,8 @@ class Settings extends ChangeNotifier {
   bool voice = true, autoPause = true;
   bool remind = true, streakGuard = true;
   int remindHour = 18, remindMinute = 0;
+  bool onboarded = false;
+  String? photoPath;
 
   Future<void> load() async {
     final sp = await SharedPreferences.getInstance();
@@ -24,6 +26,8 @@ class Settings extends ChangeNotifier {
     streakGuard = sp.getBool('streakGuard') ?? true;
     remindHour = sp.getInt('remindHour') ?? 18;
     remindMinute = sp.getInt('remindMinute') ?? 0;
+    onboarded = sp.getBool('onboarded') ?? false;
+    photoPath = sp.getString('photo');
     notifyListeners();
   }
 
@@ -55,6 +59,23 @@ class Settings extends ChangeNotifier {
     autoPause = v;
     notifyListeners();
     (await SharedPreferences.getInstance()).setBool('autoPause', v);
+  }
+
+  Future<void> setOnboarded() async {
+    onboarded = true;
+    notifyListeners();
+    (await SharedPreferences.getInstance()).setBool('onboarded', true);
+  }
+
+  Future<void> setPhoto(String? path) async {
+    photoPath = path;
+    notifyListeners();
+    final sp = await SharedPreferences.getInstance();
+    if (path == null) {
+      await sp.remove('photo');
+    } else {
+      await sp.setString('photo', path);
+    }
   }
 
   Future<void> setReminders({bool? on, bool? guard, int? hour, int? minute}) async {

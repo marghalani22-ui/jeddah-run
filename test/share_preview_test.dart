@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jeddah_run/screens/share_screen.dart';
 import 'package:jeddah_run/state/phase.dart';
 import 'package:jeddah_run/state/runs.dart';
+import 'package:jeddah_run/widgets/pace_chart.dart';
 import 'package:jeddah_run/widgets/sky.dart';
 import 'package:jeddah_run/theme/tokens.dart';
 
@@ -59,6 +60,7 @@ void main() {
       ('5-sticker', ColoredBox(color: const Color(0xFF7A8499), child: shareCardForTest(run, 2))),
       ('6-minimal-sand', shareCardForTest(run, 3, palette: 3)),
       ('7-minimal-purple', shareCardForTest(run, 3, palette: 4)),
+      ('pace-chart', ColoredBox(color: Palette.day.sand, child: const Padding(padding: EdgeInsets.all(12), child: Column(children: [PaceChart(splits: [372, 361, 358, 349, 366, 355, 340, 371])])))),
       for (final ph in Phase.values)
         ('sky-${ph.name}', ColoredBox(
           color: paletteOf(ph).sand,

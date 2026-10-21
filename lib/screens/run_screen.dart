@@ -219,13 +219,15 @@ class _RunScreenState extends State<RunScreen> {
     );
     final weekBefore = runStore.weekKm;
     await runStore.add(run);
+    final lvBefore = game.level.$1;
     final rewards = await game.afterRun(run);
+    final lvAfter = game.level.$1;
     reminders.celebrate(run, weekBefore: weekBefore);
     reminders.refresh();
     healthSync.export(run);
     _voice.say('خلصت. ${fmtKm(run.km)} كيلو في ${spokenDur(secs)}');
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => SummaryScreen(run: run, fresh: true, rewards: rewards)));
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => SummaryScreen(run: run, fresh: true, rewards: rewards, levelUp: lvAfter > lvBefore ? lvAfter : null, goalReached: weekBefore < settings.goalKm && runStore.weekKm >= settings.goalKm)));
   }
 
   @override
