@@ -282,7 +282,9 @@ class _PhotoCard extends StatelessWidget {
         onTap: onTapEmpty,
         child: Container(
           decoration: const BoxDecoration(gradient: LinearGradient(colors: [Color(0xFF22335A), Color(0xFF0B6E8A)], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
+          alignment: const Alignment(0, -.45),
           child: const Center(
+            heightFactor: 1,
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               Icon(Icons.add_a_photo_outlined, color: Colors.white70, size: 40),
               SizedBox(height: 8),

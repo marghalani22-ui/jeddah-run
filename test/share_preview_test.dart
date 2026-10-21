@@ -64,7 +64,7 @@ void main() {
         theme: ThemeData(fontFamily: 'Readex', extensions: const [Palette.day]),
         home: Directionality(
           textDirection: TextDirection.rtl,
-          child: Center(child: RepaintBoundary(key: key, child: SizedBox(width: 360, height: 640, child: card))),
+          child: Material(child: Center(child: RepaintBoundary(key: key, child: SizedBox(width: 360, height: 640, child: card)))),
         ),
       ));
       await tester.pumpAndSettle();

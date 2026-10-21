@@ -34,7 +34,11 @@ jobs:
         env:
           PREVIEW_OUT: /tmp/preview
         run: |
-          mkdir -p test/fonts && curl -sSL -o test/fonts/Readex.ttf "https://github.com/google/fonts/raw/main/ofl/readexpro/ReadexPro%5BHEXP%2Cwght%5D.ttf" || true
+          mkdir -p test/fonts
+          for u in "https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/readexpro/ReadexPro%5BHEXP%2Cwght%5D.ttf" "https://raw.githubusercontent.com/google/fonts/main/ofl/readexpro/ReadexPro%5BHEXP%2Cwght%5D.ttf"; do
+            curl -fsSL -o test/fonts/Readex.ttf "$u" && break
+          done
+          echo "::notice::preview font: $(file -b test/fonts/Readex.ttf 2>&1 | cut -c1-60)"
           flutter test > out.txt 2>&1 || { tail -40 out.txt | sed 's/^/::error::/'; exit 1; }
 
       - name: Push UI previews
