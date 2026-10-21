@@ -7,6 +7,8 @@ import '../state/runs.dart';
 import '../state/settings.dart';
 import '../state/game.dart';
 import '../state/mood.dart';
+import '../state/phase.dart';
+import '../widgets/sky.dart';
 import '../widgets/game_widgets.dart';
 import '../theme/tokens.dart';
 import '../widgets/common.dart';
@@ -58,6 +60,15 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Stack(fit: StackFit.expand, children: [
       Positioned.fill(child: JMap(onCreated: (c) => _map = c, myLocation: _loc)),
+      Positioned(
+        top: 0,
+        left: 0,
+        right: 0,
+        child: ListenableBuilder(
+          listenable: phaseClock,
+          builder: (context, _) => SkyBand(phase: phaseClock.phase, height: MediaQuery.of(context).padding.top + 190),
+        ),
+      ),
       Positioned(
         top: 0,
         left: 0,

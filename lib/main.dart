@@ -13,6 +13,7 @@ import 'services/cloud.dart';
 import 'services/reminders.dart';
 import 'services/social.dart';
 import 'state/game.dart';
+import 'state/phase.dart';
 import 'state/runs.dart';
 import 'state/settings.dart';
 import 'theme/app_theme.dart';
@@ -27,6 +28,7 @@ Future<void> main() async {
   } catch (e) {
     debugPrint('startup load failed: $e');
   }
+  phaseClock.start();
   runApp(const JeddahRunApp());
   unawaited(cloud.init());
   unawaited(reminders.init().then((_) => reminders.refresh()));
@@ -37,7 +39,7 @@ class JeddahRunApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-        listenable: settings,
+        listenable: phaseClock,
         builder: (context, _) => MaterialApp(
           title: 'لفّة',
           debugShowCheckedModeBanner: false,
@@ -48,9 +50,9 @@ class JeddahRunApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          theme: buildTheme(Brightness.light),
-          darkTheme: buildTheme(Brightness.dark),
-          themeMode: settings.themeMode,
+          theme: buildTheme(paletteOf(phaseClock.phase), brightnessOf(phaseClock.phase)),
+          themeAnimationDuration: const Duration(milliseconds: 900),
+          themeAnimationCurve: Curves.easeInOut,
           home: const Shell(),
         ),
       );

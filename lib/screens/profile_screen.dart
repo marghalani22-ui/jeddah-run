@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../services/cloud.dart';
 import '../services/reminders.dart';
 import '../state/game.dart';
+import '../state/phase.dart';
+import '../widgets/sky.dart';
 import '../widgets/game_widgets.dart';
 import '../state/runs.dart';
 import '../state/settings.dart';
@@ -181,16 +183,7 @@ class ProfileScreen extends StatelessWidget {
             ]),
             Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               const SectionHead('المظهر'),
-              SegmentedButton<Look>(
-                segments: const [
-                  ButtonSegment(value: Look.day, label: Text('نهاري'), icon: Icon(Icons.wb_sunny_outlined)),
-                  ButtonSegment(value: Look.night, label: Text('ليلي'), icon: Icon(Icons.nightlight_outlined)),
-                  ButtonSegment(value: Look.auto, label: Text('تلقائي'), icon: Icon(Icons.brightness_auto_outlined)),
-                ],
-                selected: {settings.look},
-                showSelectedIcon: false,
-                onSelectionChanged: (s) => settings.setLook(s.first),
-              ),
+              const _LookPicker(),
             ]),
           ]);
         },
@@ -248,4 +241,74 @@ class _AccountCard extends StatelessWidget {
           );
         },
       );
+}
+
+class _LookPicker extends StatelessWidget {
+  const _LookPicker();
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.pal;
+    String t(DateTime d) => '${d.hour % 12 == 0 ? 12 : d.hour % 12}:${d.minute.toString().padLeft(2, '0')}';
+    Widget tile(Look look, Phase ph, String label) {
+      final on = settings.look == look;
+      return Expanded(
+        child: GestureDetector(
+          onTap: () => settings.setLook(look),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            margin: const EdgeInsets.symmetric(horizontal: 3),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: on ? Brand.coral : p.edge, width: on ? 2.5 : 1),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Column(children: [
+                SizedBox(height: 54, child: CustomPaint(size: Size.infinite, painter: SkyPainter(ph, 0.3, 0.5))),
+                Container(
+                  width: double.infinity,
+                  color: p.card,
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Text(label, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: on ? FontWeight.w700 : FontWeight.w500, color: p.ink)),
+                ),
+              ]),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      GestureDetector(
+        onTap: () => settings.setLook(Look.auto),
+        child: Container(
+          padding: const EdgeInsets.all(Gap.m),
+          decoration: BoxDecoration(
+            color: p.card,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: settings.look == Look.auto ? Brand.coral : p.edge, width: settings.look == Look.auto ? 2.5 : 1),
+          ),
+          child: Row(children: [
+            Icon(Icons.brightness_auto_rounded, color: settings.look == Look.auto ? Brand.coral : p.muted),
+            const SizedBox(width: Gap.s),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('تلقائي حسب الشمس', style: TextStyle(fontWeight: FontWeight.w700, color: p.ink)),
+                Text('الشروق ${t(phaseClock.sunrise)} ص · الغروب ${t(phaseClock.sunset)} م · الحين: ${phaseNames[phaseClock.phase]}',
+                    style: TextStyle(fontSize: 12, color: p.muted)),
+              ]),
+            ),
+          ]),
+        ),
+      ),
+      const SizedBox(height: Gap.s),
+      Row(children: [
+        tile(Look.sunrise, Phase.sunrise, 'الشروق'),
+        tile(Look.day, Phase.day, 'النهار'),
+        tile(Look.sunset, Phase.sunset, 'الغروب'),
+        tile(Look.night, Phase.night, 'الليل'),
+      ]),
+    ]);
+  }
 }

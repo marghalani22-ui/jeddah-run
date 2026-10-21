@@ -3,8 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'tokens.dart';
 
-ThemeData buildTheme(Brightness b) {
-  final p = b == Brightness.dark ? Palette.night : Palette.day;
+ThemeData buildTheme(Palette p, Brightness b) {
   final base = ThemeData(
     useMaterial3: true,
     brightness: b,

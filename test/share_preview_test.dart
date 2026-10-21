@@ -7,7 +7,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jeddah_run/screens/share_screen.dart';
+import 'package:jeddah_run/state/phase.dart';
 import 'package:jeddah_run/state/runs.dart';
+import 'package:jeddah_run/widgets/sky.dart';
 import 'package:jeddah_run/theme/tokens.dart';
 
 /// Renders every share template to PNG when PREVIEW_OUT is set (used by CI for visual review).
@@ -57,6 +59,11 @@ void main() {
       ('5-sticker', ColoredBox(color: const Color(0xFF7A8499), child: shareCardForTest(run, 2))),
       ('6-minimal-sand', shareCardForTest(run, 3, palette: 3)),
       ('7-minimal-purple', shareCardForTest(run, 3, palette: 4)),
+      for (final ph in Phase.values)
+        ('sky-${ph.name}', ColoredBox(
+          color: paletteOf(ph).sand,
+          child: Align(alignment: Alignment.topCenter, child: SizedBox(height: 260, width: 360, child: CustomPaint(painter: SkyPainter(ph, .3, .4)))),
+        )),
     ];
     for (final (name, card) in cases) {
       final key = GlobalKey();

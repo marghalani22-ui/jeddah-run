@@ -51,6 +51,42 @@ class Palette extends ThemeExtension<Palette> {
     grapeInk: Color(0xFF4B2FC9),
   );
 
+  /// Warm morning: peach-tinted sand.
+  static const sunrise = Palette(
+    sand: Color(0xFFFBF0E6),
+    sand2: Color(0xFFF5E1D3),
+    card: Color(0xFFFFFFFF),
+    ink: Color(0xFF14213D),
+    muted: Color(0xFF6B6176),
+    edge: Color(0xFFEFD8C8),
+    good: Color(0xFF1F7A4A),
+    goodSoft: Color(0xFFE3F5EA),
+    bad: Color(0xFFC2410C),
+    badSoft: Color(0xFFFFE7DD),
+    sunSoft: Color(0xFFFFEBD0),
+    goldInk: Color(0xFF6B4A00),
+    grapeSoft: Color(0xFFF1E8FF),
+    grapeInk: Color(0xFF4B2FC9),
+  );
+
+  /// Dusk: deep plum with warm light text.
+  static const sunset = Palette(
+    sand: Color(0xFF1F1626),
+    sand2: Color(0xFF3A2845),
+    card: Color(0xFF2A1D33),
+    ink: Color(0xFFFFF3EA),
+    muted: Color(0xFFCDB6C4),
+    edge: Color(0xFF41304C),
+    good: Color(0xFF4ADE8B),
+    goodSoft: Color(0xFF173A2A),
+    bad: Color(0xFFFF9A6B),
+    badSoft: Color(0xFF45231B),
+    sunSoft: Color(0xFF45301A),
+    goldInk: Color(0xFFFFD27A),
+    grapeSoft: Color(0xFF34265A),
+    grapeInk: Color(0xFFD2C3FF),
+  );
+
   static const night = Palette(
     sand: Color(0xFF0E1525),
     sand2: Color(0xFF22335A),
