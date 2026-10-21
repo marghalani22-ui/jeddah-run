@@ -94,7 +94,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
           ),
           const SizedBox(height: Gap.m),
         ],
-        if (r.flag != null) ...
+        if (r.flag != null) ...[
           Container(
             padding: const EdgeInsets.all(Gap.m),
             decoration: BoxDecoration(color: p.badSoft, borderRadius: BorderRadius.circular(Radii.btn)),
