@@ -10,6 +10,7 @@ import 'screens/map_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/shop_screen.dart';
 import 'services/cloud.dart';
+import 'services/reminders.dart';
 import 'services/social.dart';
 import 'state/runs.dart';
 import 'state/settings.dart';
@@ -26,6 +27,7 @@ Future<void> main() async {
   }
   runApp(const JeddahRunApp());
   unawaited(cloud.init());
+  unawaited(reminders.init().then((_) => reminders.refresh()));
 }
 
 class JeddahRunApp extends StatelessWidget {

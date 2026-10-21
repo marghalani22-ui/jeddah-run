@@ -7,6 +7,7 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../services/location.dart';
+import '../services/reminders.dart';
 import '../services/voice.dart';
 import '../state/runs.dart';
 import '../state/settings.dart';
@@ -214,7 +215,10 @@ class _RunScreenState extends State<RunScreen> {
       splits: List.of(_splits),
       flag: checkRun(meters: _meters, secs: secs, rejected: _rejected, accepted: _accepted),
     );
+    final weekBefore = runStore.weekKm;
     await runStore.add(run);
+    reminders.celebrate(run, weekBefore: weekBefore);
+    reminders.refresh();
     _voice.say('خلصت. ${fmtKm(run.km)} كيلو في ${spokenDur(secs)}');
     if (!mounted) return;
     Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => SummaryScreen(run: run, fresh: true)));

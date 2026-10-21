@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/cloud.dart';
+import '../services/reminders.dart';
 import '../state/runs.dart';
 import '../state/settings.dart';
 import '../theme/tokens.dart';
@@ -70,7 +71,7 @@ class ProfileScreen extends StatelessWidget {
                 ],
                 selected: {settings.goalKm},
                 showSelectedIcon: false,
-                onSelectionChanged: (s) => settings.setGoal(s.first),
+                onSelectionChanged: (s) => settings.setGoal(s.first).then((_) => reminders.refresh()),
               ),
             ]),
             Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -92,6 +93,69 @@ class ProfileScreen extends StatelessWidget {
                     activeTrackColor: Brand.coral,
                     title: const Text('إيقاف تلقائي'),
                     subtitle: Text('يوقف الوقت لما توقف عند إشارة ويكمّل لما تتحرك', style: TextStyle(color: p.muted, fontSize: 12.5)),
+                  ),
+                ]),
+              ),
+            ]),
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              const SectionHead('التذكيرات'),
+              Card(
+                clipBehavior: Clip.antiAlias,
+                child: Column(children: [
+                  SwitchListTile(
+                    value: settings.remind,
+                    activeTrackColor: Brand.coral,
+                    title: const Text('تذكير الجولة اليومي'),
+                    subtitle: Text('رسالة خفيفة بالوقت اللي تختاره', style: TextStyle(color: p.muted, fontSize: 12.5)),
+                    onChanged: (v) async {
+                      if (v) await reminders.askPermission();
+                      await settings.setReminders(on: v);
+                      reminders.refresh();
+                    },
+                  ),
+                  if (settings.remind) ...[
+                    const Divider(indent: 16, endIndent: 16),
+                    ListTile(
+                      leading: Icon(Icons.schedule, color: p.ink),
+                      title: const Text('وقت التذكير'),
+                      trailing: Text(
+                        TimeOfDay(hour: settings.remindHour, minute: settings.remindMinute).format(context),
+                        style: const TextStyle(fontWeight: FontWeight.w700, color: Brand.coral),
+                      ),
+                      onTap: () async {
+                        final t = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay(hour: settings.remindHour, minute: settings.remindMinute),
+                        );
+                        if (t == null) return;
+                        await settings.setReminders(hour: t.hour, minute: t.minute);
+                        reminders.refresh();
+                      },
+                    ),
+                  ],
+                  const Divider(indent: 16, endIndent: 16),
+                  SwitchListTile(
+                    value: settings.streakGuard,
+                    activeTrackColor: Brand.coral,
+                    title: const Text('حماية السلسلة'),
+                    subtitle: Text('تنبيه الساعة 8:30 مساءً لو ما جريت وسلسلتك على وشك تنقطع', style: TextStyle(color: p.muted, fontSize: 12.5)),
+                    onChanged: (v) async {
+                      await settings.setReminders(guard: v);
+                      reminders.refresh();
+                    },
+                  ),
+                ]),
+              ),
+              const SizedBox(height: Gap.s),
+              Container(
+                padding: const EdgeInsets.all(Gap.m),
+                decoration: BoxDecoration(color: p.sunSoft, borderRadius: BorderRadius.circular(Radii.btn)),
+                child: Row(children: [
+                  Icon(Icons.widgets_outlined, color: p.goldInk),
+                  const SizedBox(width: Gap.s),
+                  Expanded(
+                    child: Text('حط ويدجت ركّوض على شاشتك: اضغط مطوّلاً على الشاشة الرئيسية ← الأدوات (Widgets) ← لفّة',
+                        style: TextStyle(color: p.goldInk, fontSize: 12.5, height: 1.5)),
                   ),
                 ]),
               ),
