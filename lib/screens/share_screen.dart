@@ -430,7 +430,7 @@ class _MinimalCard extends StatelessWidget {
             ])),
           ),
           const SizedBox(height: 8),
-          Text('${fmtDur(run.secs)}  ·  ${fmtPace(run.secPerKm)} /كم',
+          Text('${fmtDur(run.secs)}  ·  ${fmtPace(run.secPerKm)} لكل كم',
               style: TextStyle(color: pal.ink.withValues(alpha: .85), fontSize: 17, fontWeight: FontWeight.w600)),
           const SizedBox(height: 4),
           Text('${run.title} · ${fmtWhen(run.start)}', style: TextStyle(color: pal.ink.withValues(alpha: .65), fontSize: 12.5)),
