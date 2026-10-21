@@ -22,3 +22,4 @@
 key.properties
 # password-protected upload key; the password lives in the KEYSTORE_PASSWORD secret
 !signing/upload.jks
+test/fonts/*.ttf

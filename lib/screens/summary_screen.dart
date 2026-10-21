@@ -5,6 +5,7 @@ import '../state/runs.dart';
 import '../theme/tokens.dart';
 import '../widgets/common.dart';
 import '../widgets/jmap.dart';
+import 'share_screen.dart';
 
 /// Run summary: route on the real map, the numbers, and points earned.
 class SummaryScreen extends StatefulWidget {
@@ -46,6 +47,8 @@ class _SummaryScreenState extends State<SummaryScreen> {
     if (mounted) Navigator.pop(context);
   }
 
+  void _openShare() => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ShareScreen(run: widget.run)));
+
   Future<void> _rename() async {
     final ctl = TextEditingController(text: widget.run.name ?? '');
     final v = await showDialog<String>(
@@ -71,6 +74,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
       appBar: AppBar(
         title: Text(r.title),
         actions: [
+          IconButton(onPressed: _openShare, icon: const Icon(Icons.ios_share), tooltip: 'مشاركة'),
           IconButton(onPressed: _rename, icon: const Icon(Icons.edit_outlined), tooltip: 'تسمية الجولة'),
           IconButton(onPressed: _delete, icon: const Icon(Icons.delete_outline), tooltip: 'حذف'),
         ],
@@ -120,9 +124,15 @@ class _SummaryScreenState extends State<SummaryScreen> {
           const SectionHead('كل كيلو', trailing: 'الزمن'),
           _Splits(run: r),
         ],
+        const SizedBox(height: Gap.xl),
+        FilledButton.icon(onPressed: _openShare, icon: const Icon(Icons.ios_share), label: const Text('شارك جولتك')),
         if (widget.fresh) ...[
-          const SizedBox(height: Gap.xl),
-          FilledButton(onPressed: () => Navigator.pop(context), child: const Text('تم')),
+          const SizedBox(height: Gap.s),
+          OutlinedButton(
+            style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('تم'),
+          ),
         ],
       ]),
     );

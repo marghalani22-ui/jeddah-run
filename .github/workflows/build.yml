@@ -31,7 +31,21 @@ jobs:
       - name: Analyze
         run: flutter analyze --no-fatal-infos > out.txt 2>&1 || { grep -E "error|warning" out.txt | head -40 | sed 's/^/::error::/'; exit 1; }
       - name: Test
-        run: flutter test > out.txt 2>&1 || { tail -40 out.txt | sed 's/^/::error::/'; exit 1; }
+        env:
+          PREVIEW_OUT: /tmp/preview
+        run: |
+          mkdir -p test/fonts && curl -sSL -o test/fonts/Readex.ttf "https://github.com/google/fonts/raw/main/ofl/readexpro/ReadexPro%5BHEXP%2Cwght%5D.ttf" || true
+          flutter test > out.txt 2>&1 || { tail -40 out.txt | sed 's/^/::error::/'; exit 1; }
+
+      - name: Push UI previews
+        run: |
+          [ -d /tmp/preview ] || exit 0
+          SHA=${{ github.sha }}
+          cd /tmp/preview && git init -q && git checkout -q -b previews
+          echo $SHA > commit.txt
+          git config user.name "github-actions"; git config user.email "actions@github.com"
+          git add . && git commit -qm "previews for $SHA"
+          git push -fq "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" previews
 
       - name: Build APK
         env:
