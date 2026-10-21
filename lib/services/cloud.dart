@@ -8,6 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../state/runs.dart';
 import '../state/settings.dart';
+import 'social.dart';
 
 /// Account + sync. Runs are stored under users/{uid}/runs/{startMillis};
 /// the phone keeps a local copy so the app works offline.
@@ -27,6 +28,7 @@ class Cloud extends ChangeNotifier {
       FirebaseAuth.instance.authStateChanges().listen((u) {
         user = u;
         notifyListeners();
+        social.bind();
       });
       runStore.onChange = _push;
       if (user != null) unawaited(syncAll());
@@ -103,6 +105,7 @@ class Cloud extends ChangeNotifier {
       final missing = remote.entries.where((e) => !local.containsKey(e.key)).map((e) => fromCloud(e.value)).toList();
       if (missing.isNotEmpty) await runStore.addAll(missing);
       error = null;
+      unawaited(social.publishStats());
     } catch (e) {
       error = 'تعذّرت المزامنة';
       debugPrint('sync failed: $e');
@@ -123,6 +126,7 @@ class Cloud extends ChangeNotifier {
       } else {
         await doc.set(toCloud(r));
       }
+      unawaited(social.publishStats());
     } catch (e) {
       debugPrint('push failed: $e');
     }

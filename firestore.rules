@@ -1,22 +1,75 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Each runner can read and write only their own profile and runs.
-    match /users/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+    function signedIn() { return request.auth != null; }
+    function friendship(pair) { return get(/databases/$(database)/documents/friendships/$(pair)).data; }
+    function isFriendPair(pair) {
+      return signedIn() && exists(/databases/$(database)/documents/friendships/$(pair))
+        && friendship(pair).status == 'accepted' && request.auth.uid in friendship(pair).members;
+    }
 
+    // Private account data and runs: owner only.
+    match /users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
       match /runs/{runId} {
-        allow read, delete: if request.auth != null && request.auth.uid == uid;
-        allow create, update: if request.auth != null && request.auth.uid == uid
+        allow read, delete: if signedIn() && request.auth.uid == uid;
+        allow create, update: if signedIn() && request.auth.uid == uid
           && request.resource.data.meters is number
           && request.resource.data.meters >= 0 && request.resource.data.meters < 200000
           && request.resource.data.secs is int && request.resource.data.secs > 0
-          // average faster than 2:30 per km cannot carry points
           && (request.resource.data.meters < 1000
               || request.resource.data.secs / (request.resource.data.meters / 1000) >= 150
               || request.resource.data.points == 0);
       }
     }
+
+    // Public runner card: anyone signed in can read; only the owner writes.
+    match /profiles/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Unique @usernames.
+    match /usernames/{name} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid
+        && name.matches('^[a-z0-9_]{3,16}$');
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // Friend requests and friendships; id = the two uids sorted, joined by "_".
+    match /friendships/{pair} {
+      allow read: if signedIn() && request.auth.uid in resource.data.members;
+      allow create: if signedIn()
+        && request.resource.data.requester == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.members.size() == 2
+        && request.auth.uid in request.resource.data.members
+        && (pair == request.resource.data.members[0] + '_' + request.resource.data.members[1]
+            || pair == request.resource.data.members[1] + '_' + request.resource.data.members[0]);
+      allow update: if signedIn()
+        && resource.data.status == 'pending'
+        && request.auth.uid in resource.data.members
+        && request.auth.uid != resource.data.requester
+        && request.resource.data.status == 'accepted'
+        && request.resource.data.members == resource.data.members
+        && request.resource.data.requester == resource.data.requester;
+      allow delete: if signedIn() && request.auth.uid in resource.data.members;
+    }
+
+    // Chats between friends only.
+    match /chats/{pair} {
+      allow read: if signedIn() && request.auth.uid in resource.data.members;
+      allow create, update: if isFriendPair(pair) && request.resource.data.lastFrom == request.auth.uid;
+      match /messages/{msg} {
+        allow read: if isFriendPair(pair);
+        allow create: if isFriendPair(pair)
+          && request.resource.data.from == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 1000;
+      }
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
