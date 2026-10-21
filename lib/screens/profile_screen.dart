@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../services/cloud.dart';
+import '../services/health_sync.dart';
 import '../services/reminders.dart';
+import 'connections_screen.dart';
 import '../state/game.dart';
 import '../state/phase.dart';
 import '../widgets/sky.dart';
@@ -33,7 +35,7 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-        listenable: Listenable.merge([runStore, settings, game]),
+        listenable: Listenable.merge([runStore, settings, game, healthSync]),
         builder: (context, _) {
           final p = context.pal;
           final name = settings.name.isEmpty ? 'عدّاء' : settings.name;
@@ -65,7 +67,7 @@ class ProfileScreen extends StatelessWidget {
               Card(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(Gap.s, Gap.l, Gap.s, Gap.s),
-                  child: BadgeGrid(progressOf: (b) => b.progress(runStore)),
+                  child: BadgeGrid(progressOf: (b) => b.progress(ownRuns())),
                 ),
               ),
             ]),
@@ -95,6 +97,21 @@ class ProfileScreen extends StatelessWidget {
                 onSelectionChanged: (s) => settings.setGoal(s.first).then((_) => reminders.refresh()),
               ),
             ]),
+            Card(
+              clipBehavior: Clip.antiAlias,
+              child: ListTile(
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ConnectionsScreen())),
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(gradient: Grad.sea, borderRadius: BorderRadius.circular(12)),
+                  child: const Icon(Icons.watch_rounded, color: Colors.white, size: 22),
+                ),
+                title: const Text('الأجهزة والتطبيقات', style: TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text(healthSync.connected ? 'Health Connect مربوط' : 'اربط ساعتك وSamsung Health وغيرها', style: TextStyle(color: p.muted, fontSize: 12.5)),
+                trailing: Icon(Icons.chevron_left, color: p.muted),
+              ),
+            ),
             Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               const SectionHead('أثناء الجري'),
               Card(

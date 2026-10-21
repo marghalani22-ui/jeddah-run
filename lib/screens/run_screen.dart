@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+import '../services/health_sync.dart';
 import '../services/location.dart';
 import '../services/reminders.dart';
 import '../state/game.dart';
@@ -221,6 +222,7 @@ class _RunScreenState extends State<RunScreen> {
     final rewards = await game.afterRun(run);
     reminders.celebrate(run, weekBefore: weekBefore);
     reminders.refresh();
+    healthSync.export(run);
     _voice.say('خلصت. ${fmtKm(run.km)} كيلو في ${spokenDur(secs)}');
     if (!mounted) return;
     Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => SummaryScreen(run: run, fresh: true, rewards: rewards)));

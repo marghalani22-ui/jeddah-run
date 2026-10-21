@@ -85,7 +85,16 @@ class _SummaryScreenState extends State<SummaryScreen> {
       body: ListView(padding: const EdgeInsets.fromLTRB(Gap.l, 0, Gap.l, Gap.xxl), children: [
         Text(fmtWhen(r.start), style: Theme.of(context).textTheme.bodySmall),
         const SizedBox(height: Gap.m),
-        if (r.flag != null) ...[
+        if (r.imported) ...[
+          Container(
+            padding: const EdgeInsets.all(Gap.m),
+            decoration: BoxDecoration(color: p.sunSoft, borderRadius: BorderRadius.circular(Radii.btn)),
+            child: Text('جولة مستوردة من ${r.source}. تنحسب في المسافة والسلسلة والمستوى، بدون نقاط المتجر.',
+                style: TextStyle(color: p.goldInk, fontSize: 13, height: 1.5)),
+          ),
+          const SizedBox(height: Gap.m),
+        ],
+        if (r.flag != null) ...
           Container(
             padding: const EdgeInsets.all(Gap.m),
             decoration: BoxDecoration(color: p.badSoft, borderRadius: BorderRadius.circular(Radii.btn)),

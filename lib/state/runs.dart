@@ -22,6 +22,8 @@ class Run {
     this.splits = const [],
     this.flag,
     this.awarded,
+    this.source,
+    this.extId,
   });
 
   final DateTime start;
@@ -45,9 +47,17 @@ class Run {
   /// Distance points actually credited after the daily cap.
   int? awarded;
 
+  /// Where an imported run came from (e.g. "Samsung Health"); null = recorded in Laffa.
+  final String? source;
+
+  /// Id in the source (Health Connect record id) to avoid importing twice.
+  final String? extId;
+
+  bool get imported => source != null;
+
   double get km => meters / 1000;
   double get secPerKm => meters > 0 ? secs / km : 0;
-  int get points => flag != null ? 0 : (awarded ?? kmPoints(km));
+  int get points => (flag != null || imported) ? 0 : (awarded ?? kmPoints(km));
   String get title => (name == null || name!.trim().isEmpty) ? runTitle(start) : name!;
 
   Map<String, dynamic> toJson() => {
@@ -59,6 +69,8 @@ class Run {
         'k': splits,
         if (flag != null) 'f': flag,
         if (awarded != null) 'a': awarded,
+        if (source != null) 'src': source,
+        if (extId != null) 'ext': extId,
       };
 
   factory Run.fromJson(Map<String, dynamic> j) => Run(
@@ -70,6 +82,8 @@ class Run {
         splits: ((j['k'] as List?) ?? const []).map((e) => e as int).toList(),
         flag: j['f'] as String?,
         awarded: j['a'] as int?,
+        source: j['src'] as String?,
+        extId: j['ext'] as String?,
       );
 }
 
@@ -107,7 +121,7 @@ class RunStore extends ChangeNotifier {
   int pointsOnDay(DateTime d) => runs.where((r) => DateUtils.isSameDay(r.start, d)).fold(0, (a, r) => a + r.points);
 
   Future<void> add(Run r) async {
-    if (r.flag == null) r.awarded = math.min(kmPoints(r.km), math.max(0, dailyRunCap - pointsOnDay(r.start)));
+    if (r.flag == null && !r.imported) r.awarded = math.min(kmPoints(r.km), math.max(0, dailyRunCap - pointsOnDay(r.start)));
     runs.insert(0, r);
     notifyListeners();
     await _save();

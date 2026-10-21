@@ -146,6 +146,8 @@ Map<String, dynamic> toCloud(Run r) => {
       'flag': r.flag,
       'points': r.points,
       'awarded': r.points,
+      'source': r.source,
+      'extId': r.extId,
       'savedAt': FieldValue.serverTimestamp(),
     };
 
@@ -160,6 +162,8 @@ Run fromCloud(Map<String, dynamic> j) {
     name: j['name'] as String?,
     flag: j['flag'] as String?,
     awarded: (j['awarded'] as num?)?.toInt(),
+    source: j['source'] as String?,
+    extId: j['extId'] as String?,
   );
 }
 

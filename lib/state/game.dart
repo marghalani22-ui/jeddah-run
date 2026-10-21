@@ -119,6 +119,9 @@ int xpForNext(int level) => 100 + (level - 1) * 60;
 const _titles = ['مبتدئ', 'عدّاء الحي', 'نَفَس طويل', 'فارس الكورنيش', 'صاحب العزيمة', 'محترف المسافات', 'أسطورة لفّة'];
 String levelTitle(int level) => _titles[math.min((level - 1) ~/ 5, _titles.length - 1)];
 
+/// Badges count only runs recorded in Laffa (imports can't unlock rewards).
+RunStore ownRuns() => RunStore()..runs.addAll(runStore.runs.where((r) => !r.imported));
+
 class Game extends ChangeNotifier {
   final List<LedgerEntry> ledger = [];
   final Set<String> badges = {};
@@ -185,7 +188,7 @@ class Game extends ChangeNotifier {
     return picked;
   }
 
-  List<Run> runsOn(DateTime d) => runStore.runs.where((r) => r.flag == null && DateUtils.isSameDay(r.start, d)).toList();
+  List<Run> runsOn(DateTime d) => runStore.runs.where((r) => r.flag == null && !r.imported && DateUtils.isSameDay(r.start, d)).toList();
 
   double challengeProgress(Challenge c, DateTime day) => c.progress(runsOn(day)).clamp(0, 1).toDouble();
 
@@ -202,7 +205,7 @@ class Game extends ChangeNotifier {
     final day = run.start;
     final dayKey = _day(day);
 
-    if (run.flag == null) {
+    if (run.flag == null && !run.imported) {
       // Distance (already in the run; shown for the summary).
       final full = kmPoints(run.km);
       out.add(Reward('km', run.points < full ? 'المسافة (وصلت الحد اليومي 300)' : 'المسافة · 10 لكل كيلو كامل', run.points,
@@ -230,8 +233,9 @@ class Game extends ChangeNotifier {
     }
 
     // Badges.
+    final own = ownRuns();
     for (final b in badgeDefs) {
-      if (!badges.contains(b.id) && b.progress(runStore) >= 1) {
+      if (!badges.contains(b.id) && b.progress(own) >= 1) {
         badges.add(b.id);
         _credit('b:${b.id}', Reward('badge', 'وسام: ${b.title}', b.points, icon: b.icon), out);
       }
@@ -245,8 +249,9 @@ class Game extends ChangeNotifier {
   /// Unlocks badges earned before this feature existed (no ceremony).
   Future<void> backfill() async {
     var changed = false;
+    final own = ownRuns();
     for (final b in badgeDefs) {
-      if (!badges.contains(b.id) && b.progress(runStore) >= 1) {
+      if (!badges.contains(b.id) && b.progress(own) >= 1) {
         badges.add(b.id);
         if (!_has('b:${b.id}')) ledger.add(LedgerEntry(Reward('badge', 'وسام: ${b.title}', b.points).toJson('b:${b.id}', DateTime.now())));
         changed = true;
