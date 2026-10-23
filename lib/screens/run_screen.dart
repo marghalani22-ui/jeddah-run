@@ -132,10 +132,10 @@ class _RunScreenState extends State<RunScreen> with WidgetsBindingObserver {
     final km = _meters / 1000, secs = _elapsed;
     final paused = _phase == _Phase.paused || _phase == _Phase.autoPaused;
     reminders.showRun(
-      title: '${paused ? '⏸' : '🏃'} ${fmtKm(km)} كم · ${fmtDur(secs)}',
+      title: '\u200F${paused ? '⏸' : '🏃'} ${fmtKm(km)} كم · ⏱ ${fmtDur(secs)}',
       body: paused
           ? (_phase == _Phase.paused ? 'متوقف مؤقتاً' : 'إيقاف تلقائي · تحرّك وتكمّل')
-          : 'السرعة ${fmtPace(km > 0.05 ? secs / km : 0)} /كم · +${kmPoints(km)} نقطة',
+          : '\u200Fالسرعة ${fmtPace(km > 0.05 ? secs / km : 0)} /كم · +${kmPoints(km)} نقطة',
       paused: _phase == _Phase.paused,
     );
   }

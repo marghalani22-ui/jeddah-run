@@ -64,6 +64,7 @@ class _Log extends StatelessWidget {
           ]),
         ]),
       ),
+      const _DailyCard(),
       Card(
         child: Padding(
           padding: const EdgeInsets.all(Gap.l),
@@ -181,4 +182,147 @@ class _HeroStat extends StatelessWidget {
           Text(label, style: const TextStyle(color: Color(0xD9FFFFFF), fontSize: 12)),
         ]),
       );
+}
+
+/// Daily average: a bar per day with the average as a dashed line.
+class _DailyCard extends StatefulWidget {
+  const _DailyCard();
+
+  @override
+  State<_DailyCard> createState() => _DailyCardState();
+}
+
+class _DailyCardState extends State<_DailyCard> {
+  int _days = 7;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.pal;
+    final today = DateUtils.dateOnly(DateTime.now());
+    // Oldest first.
+    final days = [for (var i = _days - 1; i >= 0; i--) today.subtract(Duration(days: i))];
+    final valid = runStore.runs.where((r) => r.flag == null).toList();
+    final km = [
+      for (final d in days) valid.where((r) => DateUtils.isSameDay(r.start, d)).fold(0.0, (a, r) => a + r.km),
+    ];
+    final secs = valid.where((r) => !r.start.isBefore(days.first)).fold(0, (a, r) => a + r.secs);
+    final total = km.fold(0.0, (a, b) => a + b);
+    final active = km.where((k) => k > 0).length;
+    final avg = total / _days;
+    final avgActive = active == 0 ? 0.0 : total / active;
+    final best = km.reduce(math.max);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(Gap.l),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Expanded(child: Text('متوسط الجري اليومي', style: Theme.of(context).textTheme.titleMedium)),
+            SegmentedButton<int>(
+              showSelectedIcon: false,
+              style: const ButtonStyle(visualDensity: VisualDensity.compact, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+              segments: const [ButtonSegment(value: 7, label: Text('أسبوع')), ButtonSegment(value: 30, label: Text('شهر'))],
+              selected: {_days},
+              onSelectionChanged: (v) => setState(() => _days = v.first),
+            ),
+          ]),
+          const SizedBox(height: Gap.s),
+          Text.rich(TextSpan(children: [
+            TextSpan(text: fmtKm(avg), style: TextStyle(fontSize: 34, fontWeight: FontWeight.w800, color: p.ink, height: 1.1)),
+            TextSpan(text: ' كم باليوم', style: TextStyle(fontSize: 14, color: p.muted)),
+          ])),
+          Text('آخر ${_days == 7 ? '7 أيام' : '30 يوم'} · المجموع ${fmtKm(total)} كم', style: TextStyle(fontSize: 12.5, color: p.muted)),
+          const SizedBox(height: Gap.m),
+          SizedBox(height: 130, child: CustomPaint(size: Size.infinite, painter: _DailyBars(km, avg, days, p, DefaultTextStyle.of(context).style.fontFamily))),
+          const SizedBox(height: Gap.m),
+          Row(children: [
+            _MiniStat(value: '$active/$_days', label: 'أيام جريت'),
+            _MiniStat(value: fmtKm(avgActive), label: 'متوسط يوم الجري'),
+            _MiniStat(value: fmtPace(total > 0 ? secs / total : 0), label: 'متوسط السرعة'),
+            _MiniStat(value: fmtKm(best), label: 'أفضل يوم'),
+          ]),
+        ]),
+      ),
+    );
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  const _MiniStat({required this.value, required this.label});
+  final String value, label;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+        child: Column(children: [
+          Text(value, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5, color: context.pal.ink)),
+          Text(label, textAlign: TextAlign.center, style: TextStyle(fontSize: 11, color: context.pal.muted)),
+        ]),
+      );
+}
+
+class _DailyBars extends CustomPainter {
+  _DailyBars(this.v, this.avg, this.days, this.p, this.font);
+  final List<double> v;
+  final double avg;
+  final List<DateTime> days;
+  final Palette p;
+  final String? font;
+
+  static const _names = ['ن', 'ث', 'ر', 'خ', 'ج', 'س', 'ح']; // Mon..Sun
+
+  @override
+  void paint(Canvas c, Size s) {
+    final n = v.length, labels = n <= 7;
+    final bottom = labels ? 18.0 : 4.0, top = 16.0;
+    final h = s.height - top - bottom;
+    final mx = math.max(v.reduce(math.max), math.max(avg * 1.4, 1.0));
+    final gap = n <= 7 ? 12.0 : 3.0;
+    final bw = (s.width - gap * (n - 1)) / n;
+    for (var i = 0; i < n; i++) {
+      // RTL: today on the left end.
+      final x = s.width - (i + 1) * bw - i * gap;
+      final bh = v[i] <= 0 ? 3.0 : math.max(5.0, v[i] / mx * h);
+      final rect = Rect.fromLTWH(x, top + h - bh, bw, bh);
+      final paint = Paint();
+      if (v[i] <= 0) {
+        paint.color = p.edge;
+      } else if (v[i] >= avg) {
+        paint.shader = Grad.sunset.createShader(rect);
+      } else {
+        paint.color = Brand.sea.withValues(alpha: .55);
+      }
+      c.drawRRect(RRect.fromRectAndRadius(rect, Radius.circular(n <= 7 ? 7 : 3)), paint);
+      if (labels) {
+        final today = i == n - 1;
+        _text(c, today ? 'اليوم' : _names[days[i].weekday - 1], Offset(x + bw / 2, s.height - 14), today ? Brand.coral : p.muted, 10.5);
+        if (v[i] > 0) _text(c, v[i].toStringAsFixed(1), Offset(x + bw / 2, top + h - bh - 14), p.ink, 10);
+      }
+    }
+    // Average line.
+    final ay = top + h - avg / mx * h;
+    final dash = Paint()
+      ..color = p.ink.withValues(alpha: .55)
+      ..strokeWidth = 1.2;
+    for (double x = 0; x < s.width; x += 8) {
+      c.drawLine(Offset(x, ay), Offset(math.min(x + 4, s.width), ay), dash);
+    }
+    final tp = TextPainter(
+      text: TextSpan(text: 'المتوسط ${avg.toStringAsFixed(1)}', style: TextStyle(fontFamily: font, fontSize: 10, fontWeight: FontWeight.w700, color: p.card)),
+      textDirection: TextDirection.rtl,
+    )..layout();
+    final r = RRect.fromRectAndRadius(Rect.fromLTWH(s.width - tp.width - 10, ay - 9, tp.width + 10, 18), const Radius.circular(9));
+    c.drawRRect(r, Paint()..color = p.ink);
+    tp.paint(c, Offset(s.width - tp.width - 5, ay - tp.height / 2));
+  }
+
+  void _text(Canvas c, String t, Offset at, Color color, double size) {
+    final tp = TextPainter(
+      text: TextSpan(text: t, style: TextStyle(fontFamily: font, fontSize: size, fontWeight: FontWeight.w600, color: color)),
+      textDirection: TextDirection.rtl,
+    )..layout();
+    tp.paint(c, Offset(at.dx - tp.width / 2, at.dy));
+  }
+
+  @override
+  bool shouldRepaint(_DailyBars o) => true;
 }

@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jeddah_run/screens/chat_screen.dart';
 import 'package:jeddah_run/screens/friend_profile_screen.dart';
 import 'package:jeddah_run/screens/friends_screen.dart';
+import 'package:jeddah_run/screens/log_screen.dart';
 import 'package:jeddah_run/screens/points_screen.dart';
 import 'package:jeddah_run/services/weather.dart';
 import 'package:jeddah_run/state/game.dart';
@@ -78,6 +79,9 @@ void main() {
 
     // Points history and weather data.
     final rp = <List<double>>[[21.56, 39.13], [21.57, 39.13]];
+    for (final (d, m, t) in [(2, 4200, 1560), (3, 6100, 2200), (5, 3500, 1300), (6, 8200, 3010), (8, 5000, 1850), (10, 4400, 1610), (12, 6600, 2400), (13, 3000, 1150)]) {
+      runStore.runs.add(Run(start: now.subtract(Duration(days: d, hours: 1)), secs: t, meters: m.toDouble(), path: const []));
+    }
     runStore.runs.addAll([
       Run(start: now.subtract(const Duration(hours: 2)), secs: 1900, meters: 5320, path: rp, splits: const [360, 355, 350, 362, 349]),
       Run(start: now.subtract(const Duration(days: 1, hours: 3)), secs: 2600, meters: 7100, path: rp),
@@ -107,6 +111,7 @@ void main() {
         ('chat-$tn', ChatScreen(otherUid: 'a', debugMessages: Stream.value(msgs))),
         ('friend-$tn', const FriendProfileScreen(uid: 'c')),
         ('points-$tn', const PointsScreen()),
+        ('log-$tn', const Scaffold(body: LogScreen())),
         ('weather-$tn', const Scaffold(body: SafeArea(child: Column(children: [Padding(padding: EdgeInsets.all(12), child: WeatherPill()), Spacer(), Card(child: WeatherSheet())])))),
       ];
       for (final (name, screen) in cases) {
