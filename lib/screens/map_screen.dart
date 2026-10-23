@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
+import '../services/background.dart';
 import '../services/location.dart';
+import '../services/steps.dart';
 import '../state/runs.dart';
 import '../state/settings.dart';
 import '../state/game.dart';
@@ -13,6 +15,7 @@ import '../widgets/game_widgets.dart';
 import '../theme/tokens.dart';
 import '../widgets/common.dart';
 import '../widgets/gradient_button.dart';
+import '../widgets/celebration.dart';
 import '../widgets/jmap.dart';
 import 'run_screen.dart';
 
@@ -31,6 +34,22 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     _init();
+    steps.addListener(_onSteps);
+  }
+
+  @override
+  void dispose() {
+    steps.removeListener(_onSteps);
+    super.dispose();
+  }
+
+  void _onSteps() {
+    final r = steps.justEarned;
+    if (r == null || !mounted) return;
+    steps.justEarned = null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) celebrate(context, icon: Icons.directions_walk_rounded, title: 'مهمة الخطوات تمّت!', subtitle: '${fmtSteps(steps.today)} خطوة · +${r.points} نقطة', color: Brand.leaf);
+    });
   }
 
   Future<void> _init() async {
@@ -53,6 +72,8 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _start() async {
     if (!await ensureLocation(context) || !mounted) return;
+    await ensureBackgroundOk(context);
+    if (!mounted) return;
     await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RunScreen(), fullscreenDialog: true));
   }
 
@@ -92,7 +113,7 @@ class _MapScreenState extends State<MapScreen> {
         right: Gap.m,
         bottom: Gap.m,
         child: ListenableBuilder(
-          listenable: Listenable.merge([runStore, settings]),
+          listenable: Listenable.merge([runStore, settings, steps, game]),
           builder: (context, _) => _WeekCard(onStart: _start, onRecenter: _recenter),
         ),
       ),
@@ -195,10 +216,102 @@ class _WeekCard extends StatelessWidget {
               ]),
             ),
           ]),
-          const SizedBox(height: Gap.l),
+          const SizedBox(height: Gap.m),
+          const _StepsRow(),
+          const SizedBox(height: Gap.m),
           GradientButton(label: 'ابدأ جولة', icon: Icons.play_arrow_rounded, onPressed: onStart, height: 58),
         ]),
       ),
     ]);
+  }
+}
+
+/// Daily step mission inside the week card.
+class _StepsRow extends StatelessWidget {
+  const _StepsRow();
+
+  Future<void> _pickGoal(BuildContext context) => showModalBottomSheet(
+        context: context,
+        showDragHandle: true,
+        builder: (c) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(Gap.l, 0, Gap.l, Gap.l),
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Text('هدف الخطوات اليومي', style: Theme.of(c).textTheme.titleLarge),
+              const SizedBox(height: 4),
+              Text('توصل له وتاخذ النقاط مرة كل يوم. الهدف الأعلى نقاطه أكثر.', style: TextStyle(color: c.pal.muted)),
+              const SizedBox(height: Gap.m),
+              for (final e in Game.stepGoals.entries)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(settings.stepGoal == e.key ? Icons.radio_button_checked : Icons.radio_button_off, color: Brand.coral),
+                  title: Text('${fmtSteps(e.key)} خطوة', style: const TextStyle(fontWeight: FontWeight.w600)),
+                  trailing: Text('+${e.value} نقطة', style: const TextStyle(color: Brand.coral, fontWeight: FontWeight.w700)),
+                  onTap: () {
+                    steps.setGoal(e.key);
+                    Navigator.pop(c);
+                  },
+                ),
+            ]),
+          ),
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.pal;
+    final pts = Game.stepGoals[steps.goal] ?? 20;
+    if (!steps.on) {
+      if (steps.ready && !steps.available) return const SizedBox.shrink();
+      return InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: steps.enable,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(color: p.goodSoft, borderRadius: BorderRadius.circular(16)),
+          child: Row(children: [
+            Icon(Icons.directions_walk_rounded, color: p.good),
+            const SizedBox(width: Gap.s),
+            Expanded(child: Text('فعّل عداد الخطوات · مهمة يومية بـ +$pts نقطة', style: TextStyle(color: p.good, fontWeight: FontWeight.w700, fontSize: 13))),
+            Icon(Icons.chevron_left_rounded, color: p.good),
+          ]),
+        ),
+      );
+    }
+    final n = steps.today, goal = steps.goal;
+    final done = game.stepsDone(DateTime.now());
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () => _pickGoal(context),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+        decoration: BoxDecoration(color: p.sand2, borderRadius: BorderRadius.circular(16)),
+        child: Row(children: [
+          Icon(Icons.directions_walk_rounded, color: done ? p.good : Brand.coral),
+          const SizedBox(width: Gap.s),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Text(fmtSteps(n), style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: p.ink)),
+                Text(' / ${fmtSteps(goal)} خطوة', style: TextStyle(fontSize: 12.5, color: p.muted)),
+                const Spacer(),
+                Text(done ? '✓ +$pts' : '+$pts نقطة',
+                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: done ? p.good : Brand.coral)),
+              ]),
+              const SizedBox(height: 5),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: goal == 0 ? 0 : (n / goal).clamp(0, 1).toDouble(),
+                  minHeight: 6,
+                  color: done ? p.good : Brand.coral,
+                  backgroundColor: p.edge,
+                ),
+              ),
+            ]),
+          ),
+        ]),
+      ),
+    );
   }
 }

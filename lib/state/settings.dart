@@ -13,6 +13,8 @@ class Settings extends ChangeNotifier {
   int remindHour = 18, remindMinute = 0;
   bool onboarded = false;
   String? photoPath;
+  int stepGoal = 8000;
+  bool batteryAsked = false;
 
   Future<void> load() async {
     final sp = await SharedPreferences.getInstance();
@@ -28,6 +30,8 @@ class Settings extends ChangeNotifier {
     remindMinute = sp.getInt('remindMinute') ?? 0;
     onboarded = sp.getBool('onboarded') ?? false;
     photoPath = sp.getString('photo');
+    stepGoal = sp.getInt('stepGoal') ?? 8000;
+    batteryAsked = sp.getBool('batteryAsked') ?? false;
     notifyListeners();
   }
 
@@ -91,6 +95,16 @@ class Settings extends ChangeNotifier {
     await sp.setInt('remindMinute', remindMinute);
   }
 
+  Future<void> setStepGoal(int v) async {
+    stepGoal = v;
+    notifyListeners();
+    (await SharedPreferences.getInstance()).setInt('stepGoal', v);
+  }
+
+  Future<void> setBatteryAsked() async {
+    batteryAsked = true;
+    (await SharedPreferences.getInstance()).setBool('batteryAsked', true);
+  }
 }
 
 final settings = Settings();

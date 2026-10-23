@@ -263,6 +263,22 @@ class Game extends ChangeNotifier {
     }
   }
 
+  /// Daily step mission. Bigger goals pay more; once per day.
+  static const stepGoals = {6000: 15, 8000: 20, 10000: 25, 12000: 30};
+
+  bool stepsDone(DateTime day) => _has('st:${_day(day)}');
+
+  Future<Reward?> checkSteps(int steps, int goal) async {
+    final now = DateTime.now();
+    final pts = stepGoals[goal] ?? 20;
+    if (steps < goal || stepsDone(now)) return null;
+    final out = <Reward>[];
+    _credit('st:${_day(now)}', Reward('steps', 'مهمة الخطوات · ${fmtSteps(goal)} خطوة', pts, icon: Icons.directions_walk_rounded), out);
+    await _save();
+    notifyListeners();
+    return out.firstOrNull;
+  }
+
   void _credit(String id, Reward r, List<Reward> out) {
     if (_has(id)) return;
     ledger.add(LedgerEntry(r.toJson(id, DateTime.now())));
@@ -271,3 +287,6 @@ class Game extends ChangeNotifier {
 }
 
 final game = Game();
+
+/// 8450 → "8,450".
+String fmtSteps(int n) => n.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ',');

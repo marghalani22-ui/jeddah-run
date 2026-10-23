@@ -9,11 +9,15 @@ import 'screens/log_screen.dart';
 import 'screens/map_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/run_screen.dart';
+import 'screens/summary_screen.dart';
 import 'screens/shop_screen.dart';
 import 'services/cloud.dart';
 import 'services/health_sync.dart';
 import 'services/reminders.dart';
+import 'services/run_draft.dart';
 import 'services/social.dart';
+import 'services/steps.dart';
 import 'state/game.dart';
 import 'state/phase.dart';
 import 'state/runs.dart';
@@ -35,6 +39,7 @@ Future<void> main() async {
   unawaited(cloud.init());
   unawaited(reminders.init().then((_) => reminders.refresh()));
   unawaited(healthSync.init());
+  unawaited(steps.init());
 }
 
 class JeddahRunApp extends StatelessWidget {
@@ -70,6 +75,45 @@ class Shell extends StatefulWidget {
 
 class _ShellState extends State<Shell> {
   int _i = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _recover());
+  }
+
+  /// A run that was going when the app was closed: continue, save or drop it.
+  Future<void> _recover() async {
+    final d = await RunDraft.load();
+    if (d == null || !mounted) return;
+    final choice = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (c) => AlertDialog(
+        icon: const Icon(Icons.directions_run_rounded, size: 40),
+        title: const Text('عندك جولة ما خلصت'),
+        content: Text('${fmtKm(d.meters / 1000)} كم في ${fmtDur(d.secs)}، بدأت ${fmtWhen(d.start)}.'
+            '${d.resumable ? '' : '\nمرّ عليها وقت طويل، تقدر تحفظها بس.'}'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, 'drop'), child: const Text('احذفها')),
+          if (d.meters >= 50) TextButton(onPressed: () => Navigator.pop(c, 'save'), child: const Text('احفظها')),
+          if (d.resumable) FilledButton(onPressed: () => Navigator.pop(c, 'resume'), child: const Text('كمّلها')),
+        ],
+      ),
+    );
+    if (!mounted) return;
+    switch (choice) {
+      case 'resume':
+        await Navigator.of(context).push(MaterialPageRoute(builder: (_) => RunScreen(resume: d), fullscreenDialog: true));
+      case 'save':
+        final c = await commitRun(d.toRun());
+        if (!mounted) return;
+        await Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => SummaryScreen(run: c.run, fresh: true, rewards: c.rewards, levelUp: c.levelUp, goalReached: c.goalReached)));
+      default:
+        await RunDraft.clear();
+    }
+  }
 
   // The map tab stays alive; the other tabs are light and rebuild on demand.
   static const _pages = [MapScreen(), LogScreen(), FriendsScreen(), ShopScreen(), ProfileScreen()];

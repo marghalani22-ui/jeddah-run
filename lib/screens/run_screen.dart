@@ -6,10 +6,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-import '../services/health_sync.dart';
 import '../services/location.dart';
-import '../services/reminders.dart';
-import '../state/game.dart';
+import '../services/run_draft.dart';
 import '../services/voice.dart';
 import '../state/runs.dart';
 import '../state/settings.dart';
@@ -20,7 +18,10 @@ import 'summary_screen.dart';
 /// Live run: countdown, GPS-tracked distance/time/pace, auto-pause,
 /// per-km splits with spoken cues, and the route drawn on the map.
 class RunScreen extends StatefulWidget {
-  const RunScreen({super.key});
+  const RunScreen({super.key, this.resume});
+
+  /// Continue a run that was interrupted (app closed or killed).
+  final RunDraft? resume;
 
   @override
   State<RunScreen> createState() => _RunScreenState();
@@ -28,7 +29,7 @@ class RunScreen extends StatefulWidget {
 
 enum _Phase { countdown, running, paused, autoPaused }
 
-class _RunScreenState extends State<RunScreen> {
+class _RunScreenState extends State<RunScreen> with WidgetsBindingObserver {
   // Readings worse than this are ignored; jumps faster than this are GPS noise or a vehicle.
   static const _maxAccuracy = 25.0, _maxSpeed = 8.0, _minStep = 2.0;
   // Auto-pause after this long without movement; resume above this speed.
@@ -52,11 +53,32 @@ class _RunScreenState extends State<RunScreen> {
 
   bool get _moving => _phase == _Phase.running;
 
+  // Time from an interrupted run that this screen continues.
+  int _baseSecs = 0, _sinceSave = 0;
+  int get _elapsed => _baseSecs + _sw.elapsed.inSeconds;
+
   @override
   void initState() {
     super.initState();
     WakelockPlus.enable();
     _voice.init();
+    WidgetsBinding.instance.addObserver(this);
+    final d = widget.resume;
+    if (d != null) {
+      _startedAt = d.start;
+      _baseSecs = d.secs;
+      _meters = d.meters;
+      _pts.addAll(d.path.map((e) => LatLng(e[0], e[1])));
+      _splits.addAll(d.splits);
+      _splitAt = d.splitAt;
+      _accepted = d.accepted;
+      _rejected = d.rejected;
+      _lastMove = DateTime.now();
+      _phase = _Phase.running;
+      _sw.start();
+      // _last stays null so the gap since the app closed isn't bridged with a straight line.
+      WidgetsBinding.instance.addPostFrameCallback((_) => _voice.say('كمّلنا جولتك'));
+    }
     // GPS warms up during the countdown.
     _sub = Geolocator.getPositionStream(locationSettings: runSettings()).listen(_onPos);
     _tick = Timer.periodic(const Duration(seconds: 1), (_) => _onTick());
@@ -64,6 +86,7 @@ class _RunScreenState extends State<RunScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _sub?.cancel();
     _tick?.cancel();
     _voice.stop();
@@ -71,7 +94,32 @@ class _RunScreenState extends State<RunScreen> {
     super.dispose();
   }
 
+  // Leaving the app is the moment it is most likely to be killed: save now.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState s) {
+    if (s == AppLifecycleState.paused || s == AppLifecycleState.inactive || s == AppLifecycleState.detached) _saveDraft();
+  }
+
+  Future<void> _saveDraft() async {
+    if (_phase == _Phase.countdown || _closed) return;
+    _sinceSave = 0;
+    await RunDraft(
+      start: _startedAt,
+      secs: _elapsed,
+      meters: _meters,
+      path: _pts.map((e) => [e.latitude, e.longitude]).toList(),
+      splits: List.of(_splits),
+      splitAt: _splitAt,
+      accepted: _accepted,
+      rejected: _rejected,
+      savedAt: DateTime.now(),
+    ).save();
+  }
+
+  bool _closed = false;
+
   void _onTick() {
+    if (_phase != _Phase.countdown && ++_sinceSave >= 10) _saveDraft();
     if (!mounted) return;
     if (_phase == _Phase.countdown) {
       HapticFeedback.heavyImpact();
@@ -140,7 +188,7 @@ class _RunScreenState extends State<RunScreen> {
   void _checkSplit() {
     final km = (_meters / 1000).floor();
     if (km <= _splits.length) return;
-    final now = _sw.elapsed.inSeconds;
+    final now = _elapsed;
     final split = now - _splitAt;
     _splitAt = now;
     _splits.add(split);
@@ -186,6 +234,7 @@ class _RunScreenState extends State<RunScreen> {
       Navigator.pop(context);
       return;
     }
+    _saveDraft();
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
@@ -203,12 +252,14 @@ class _RunScreenState extends State<RunScreen> {
     );
     if (ok != true || !mounted) return;
     _sw.stop();
+    _closed = true;
     await _sub?.cancel();
     if (_meters < 50) {
+      await RunDraft.clear();
       if (mounted) Navigator.pop(context);
       return;
     }
-    final secs = _sw.elapsed.inSeconds;
+    final secs = _elapsed;
     final run = Run(
       start: _startedAt,
       secs: secs,
@@ -217,23 +268,16 @@ class _RunScreenState extends State<RunScreen> {
       splits: List.of(_splits),
       flag: checkRun(meters: _meters, secs: secs, rejected: _rejected, accepted: _accepted),
     );
-    final weekBefore = runStore.weekKm;
-    await runStore.add(run);
-    final lvBefore = game.level.$1;
-    final rewards = await game.afterRun(run);
-    final lvAfter = game.level.$1;
-    reminders.celebrate(run, weekBefore: weekBefore);
-    reminders.refresh();
-    healthSync.export(run);
+    final c = await commitRun(run);
     _voice.say('خلصت. ${fmtKm(run.km)} كيلو في ${spokenDur(secs)}');
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => SummaryScreen(run: run, fresh: true, rewards: rewards, levelUp: lvAfter > lvBefore ? lvAfter : null, goalReached: weekBefore < settings.goalKm && runStore.weekKm >= settings.goalKm)));
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => SummaryScreen(run: run, fresh: true, rewards: c.rewards, levelUp: c.levelUp, goalReached: c.goalReached)));
   }
 
   @override
   Widget build(BuildContext context) {
     final p = context.pal;
-    final secs = _sw.elapsed.inSeconds;
+    final secs = _elapsed;
     final km = _meters / 1000;
     final gps = _accuracy <= 10 ? ('ممتاز', p.good) : _accuracy <= _maxAccuracy ? ('مقبول', p.goldInk) : ('يبحث…', p.bad);
     final status = switch (_phase) {
