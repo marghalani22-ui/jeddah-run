@@ -77,7 +77,7 @@ class Weather extends ChangeNotifier {
       final uri = Uri.https('api.open-meteo.com', '/v1/forecast', {
         'latitude': lat.toStringAsFixed(3),
         'longitude': lon.toStringAsFixed(3),
-        'current': 'apparent_temperature,relative_humidity_2m,uv_index',
+        'current': 'apparent_temperature,relative_humidity_2m',
         'hourly': 'apparent_temperature,relative_humidity_2m,uv_index',
         'forecast_days': '2',
         'timezone': 'auto',
@@ -90,8 +90,6 @@ class Weather extends ChangeNotifier {
       if (res.statusCode != 200) return;
       final j = jsonDecode(body) as Map<String, dynamic>;
       final c = j['current'] as Map<String, dynamic>;
-      now = HourFeel(DateTime.now(), (c['apparent_temperature'] as num).toDouble(), (c['relative_humidity_2m'] as num?)?.toDouble() ?? 0,
-          (c['uv_index'] as num?)?.toDouble() ?? 0);
       final h = j['hourly'] as Map<String, dynamic>;
       final t = (h['time'] as List).cast<String>();
       final f = (h['apparent_temperature'] as List);
@@ -103,6 +101,9 @@ class Weather extends ChangeNotifier {
           if (f[i] != null)
             HourFeel(DateTime.parse(t[i]), (f[i] as num).toDouble(), (hu[i] as num?)?.toDouble() ?? 0, (uv[i] as num?)?.toDouble() ?? 0),
       ].where((x) => x.at.isAfter(start) && x.at.isBefore(start.add(const Duration(hours: 24)))).toList();
+      // UV for "now" comes from the current hour of the hourly series.
+      now = HourFeel(DateTime.now(), (c['apparent_temperature'] as num).toDouble(), (c['relative_humidity_2m'] as num?)?.toDouble() ?? 0,
+          hours.isEmpty ? 0 : hours.first.uv);
       _fetched = DateTime.now();
       notifyListeners();
     } catch (e) {
