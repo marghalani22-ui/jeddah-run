@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../state/game.dart';
 import '../state/runs.dart';
 import '../state/settings.dart';
 
@@ -16,11 +17,17 @@ class Profile {
         code = d['code'] as String? ?? '',
         weekKm = (d['weekKm'] as num?)?.toDouble() ?? 0,
         totalKm = (d['totalKm'] as num?)?.toDouble() ?? 0,
-        streak = (d['streak'] as num?)?.toInt() ?? 0;
+        streak = (d['streak'] as num?)?.toInt() ?? 0,
+        bestStreak = (d['bestStreak'] as num?)?.toInt() ?? 0,
+        level = (d['level'] as num?)?.toInt() ?? 1,
+        runs = (d['runs'] as num?)?.toInt() ?? 0,
+        longestKm = (d['longestKm'] as num?)?.toDouble() ?? 0,
+        badges = ((d['badges'] as List?) ?? const []).cast<String>().toSet();
 
   final String uid, name, code;
-  final double weekKm, totalKm;
-  final int streak;
+  final double weekKm, totalKm, longestKm;
+  final int streak, bestStreak, level, runs;
+  final Set<String> badges;
 }
 
 enum FriendState { pendingIn, pendingOut, friends }
@@ -161,6 +168,11 @@ class Social extends ChangeNotifier {
         'weekKm': double.parse(runStore.weekKm.toStringAsFixed(2)),
         'totalKm': double.parse(runStore.totalKm.toStringAsFixed(1)),
         'streak': runStore.streak,
+        'bestStreak': runStore.bestStreak,
+        'level': game.level.$1,
+        'runs': ownRuns().runs.length,
+        'longestKm': double.parse((runStore.longest?.km ?? 0).toStringAsFixed(2)),
+        'badges': game.badges.toList(),
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     } catch (e) {

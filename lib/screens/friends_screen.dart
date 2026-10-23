@@ -12,6 +12,7 @@ import '../widgets/friend_avatar.dart';
 import '../widgets/gradient_button.dart';
 import '../widgets/user_avatar.dart';
 import 'chat_screen.dart';
+import 'friend_profile_screen.dart';
 
 /// Friends tab: your @username, add by username, requests, and a weekly
 /// leaderboard of friends that doubles as the chat list.
@@ -119,6 +120,8 @@ class _FriendsListState extends State<FriendsList> {
     return (pr?.name.toLowerCase().contains(q) ?? false) || (pr?.code.contains(q) ?? false);
   }
 
+  void _openProfile(String uid) => Navigator.of(context).push(MaterialPageRoute(builder: (_) => FriendProfileScreen(uid: uid)));
+
   void _openChat(String uid) => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ChatScreen(otherUid: uid)));
 
   @override
@@ -164,7 +167,7 @@ class _FriendsListState extends State<FriendsList> {
                 color: Brand.coral,
                 onRefresh: social.refreshProfiles,
                 child: ListView(padding: const EdgeInsets.only(bottom: 96), children: [
-                  if (!_searching) _WeekStrip(board: board, onTap: (uid) => _openChat(uid)),
+                  if (!_searching) _WeekStrip(board: board, onTap: _openProfile),
                   if (incoming.isNotEmpty) ...[
                     _Label('أضافوك', count: incoming.length),
                     for (final f in incoming) _RequestRow(f: f),
@@ -192,7 +195,7 @@ class _FriendsListState extends State<FriendsList> {
                   else
                     for (var i = 0; i < chats.length; i++) ...[
                       if (i > 0) Divider(height: 1, indent: 84, endIndent: Gap.l, color: p.edge),
-                      _ChatRow(uid: chats[i], onTap: () => _openChat(chats[i])),
+                      _ChatRow(uid: chats[i], onTap: () => _openChat(chats[i]), onAvatar: () => _openProfile(chats[i])),
                     ],
                   if (outgoing.isNotEmpty) ...[
                     const _Label('طلبات أرسلتها'),
@@ -384,7 +387,10 @@ class _RequestRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: Gap.l, vertical: 6),
       child: Row(children: [
-        FriendAvatar(name: pr?.name ?? '؟', size: 48),
+        GestureDetector(
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => FriendProfileScreen(uid: f.other))),
+          child: FriendAvatar(name: pr?.name ?? '؟', size: 48),
+        ),
         const SizedBox(width: Gap.m),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -413,9 +419,9 @@ class _RequestRow extends StatelessWidget {
 
 /// One chat line: status icon (new / received / sent), time and the friend's running streak.
 class _ChatRow extends StatelessWidget {
-  const _ChatRow({required this.uid, required this.onTap});
+  const _ChatRow({required this.uid, required this.onTap, required this.onAvatar});
   final String uid;
-  final VoidCallback onTap;
+  final VoidCallback onTap, onAvatar;
 
   @override
   Widget build(BuildContext context) {
@@ -436,7 +442,7 @@ class _ChatRow extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: Gap.l, vertical: 10),
         child: Row(children: [
-          FriendAvatar(name: pr?.name ?? '؟', size: 54, ring: (pr?.weekKm ?? 0) > 0),
+          GestureDetector(onTap: onAvatar, child: FriendAvatar(name: pr?.name ?? '؟', size: 54, ring: (pr?.weekKm ?? 0) > 0)),
           const SizedBox(width: Gap.m),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

@@ -4,6 +4,7 @@ import '../state/game.dart';
 import '../state/runs.dart';
 import '../theme/tokens.dart';
 import '../widgets/common.dart';
+import 'points_screen.dart';
 
 class ShopScreen extends StatelessWidget {
   const ShopScreen({super.key});
@@ -12,7 +13,9 @@ class ShopScreen extends StatelessWidget {
   Widget build(BuildContext context) => ListenableBuilder(
         listenable: Listenable.merge([runStore, game]),
         builder: (context, _) => PageBody(title: 'المتجر', children: [
-          Container(
+          GestureDetector(
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PointsScreen())),
+            child: Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               gradient: Grad.night,
@@ -30,7 +33,9 @@ class ShopScreen extends StatelessWidget {
                       style: TextStyle(color: Color(0xFFFFD27A), fontSize: 12.5, fontWeight: FontWeight.w600)),
                 ]),
               ),
+              const Icon(Icons.chevron_left_rounded, color: Color(0xFFA9B3C7)),
             ]),
+          ),
           ),
           const EmptyState(
             icon: Icons.storefront_outlined,

@@ -5,6 +5,7 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 import '../services/background.dart';
 import '../services/location.dart';
 import '../services/steps.dart';
+import '../services/weather.dart';
 import '../state/runs.dart';
 import '../state/settings.dart';
 import '../state/game.dart';
@@ -17,6 +18,8 @@ import '../widgets/common.dart';
 import '../widgets/gradient_button.dart';
 import '../widgets/celebration.dart';
 import '../widgets/jmap.dart';
+import '../widgets/weather_widgets.dart';
+import 'points_screen.dart';
 import 'run_screen.dart';
 
 class MapScreen extends StatefulWidget {
@@ -57,6 +60,7 @@ class _MapScreenState extends State<MapScreen> {
     if (!mounted) return;
     setState(() => _loc = ok);
     if (ok) _recenter();
+    weather.refresh(force: ok);
   }
 
   Future<void> _recenter() async {
@@ -72,6 +76,7 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _start() async {
     if (!await ensureLocation(context) || !mounted) return;
+    if (!await heatCheck(context) || !mounted) return;
     await ensureBackgroundOk(context);
     if (!mounted) return;
     await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RunScreen(), fullscreenDialog: true));
@@ -102,7 +107,7 @@ class _MapScreenState extends State<MapScreen> {
               builder: (context, _) => const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 _Header(),
                 SizedBox(height: Gap.s),
-                ChallengesPill(),
+                Wrap(spacing: Gap.s, runSpacing: Gap.s, children: [ChallengesPill(), WeatherPill()]),
               ]),
             ),
           ),
@@ -150,7 +155,9 @@ class _Header extends StatelessWidget {
         ),
       ),
       const SizedBox(width: Gap.s),
-      Container(
+      GestureDetector(
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PointsScreen())),
+        child: Container(
         height: 60,
         padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(gradient: Grad.night, borderRadius: BorderRadius.circular(22)),
@@ -159,6 +166,7 @@ class _Header extends StatelessWidget {
           const SizedBox(width: 6),
           Text('${game.balance}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
         ]),
+      ),
       ),
     ]);
   }

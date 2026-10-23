@@ -18,6 +18,7 @@ import 'services/reminders.dart';
 import 'services/run_draft.dart';
 import 'services/social.dart';
 import 'services/steps.dart';
+import 'services/weather.dart';
 import 'state/game.dart';
 import 'state/phase.dart';
 import 'state/runs.dart';
@@ -40,6 +41,7 @@ Future<void> main() async {
   unawaited(reminders.init().then((_) => reminders.refresh()));
   unawaited(healthSync.init());
   unawaited(steps.init());
+  unawaited(weather.refresh());
 }
 
 class JeddahRunApp extends StatelessWidget {

@@ -162,13 +162,16 @@ class LevelCard extends StatelessWidget {
 
 /// Badge grid: unlocked in colour, locked in grey with progress.
 class BadgeGrid extends StatelessWidget {
-  const BadgeGrid({super.key, required this.progressOf});
+  const BadgeGrid({super.key, required this.progressOf, this.earned});
   final double Function(BadgeDef b) progressOf;
+
+  /// Whose badges to show; defaults to mine.
+  final Set<String>? earned;
 
   @override
   Widget build(BuildContext context) {
-    final p = context.pal;
-    final sorted = [...badgeDefs]..sort((a, b) => (game.badges.contains(b.id) ? 1 : 0).compareTo(game.badges.contains(a.id) ? 1 : 0));
+    final p = context.pal, mine = earned ?? game.badges.toSet();
+    final sorted = [...badgeDefs]..sort((a, b) => (mine.contains(b.id) ? 1 : 0).compareTo(mine.contains(a.id) ? 1 : 0));
     return GridView.count(
       crossAxisCount: 4,
       shrinkWrap: true,
@@ -179,7 +182,7 @@ class BadgeGrid extends StatelessWidget {
       children: [
         for (final b in sorted)
           Builder(builder: (context) {
-            final on = game.badges.contains(b.id);
+            final on = mine.contains(b.id);
             final prog = on ? 1.0 : progressOf(b);
             return Tooltip(
               message: '${b.title}: ${b.hint} · +${b.points}',

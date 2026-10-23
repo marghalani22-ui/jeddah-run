@@ -43,11 +43,66 @@ class Reminders {
     try {
       tzdata.initializeTimeZones();
       tz.setLocalLocation(tz.getLocation('Asia/Riyadh'));
-      await _n.initialize(const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher_monochrome')));
+      await _n.initialize(
+        const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher_monochrome')),
+        onDidReceiveNotificationResponse: (r) {
+          final a = r.actionId;
+          if (a != null && a.startsWith('run_')) onRunAction?.call(a);
+        },
+      );
       _ready = true;
     } catch (e) {
       debugPrint('reminders init: $e');
     }
+  }
+
+  /// Set by the live run screen: receives 'run_pause' / 'run_stop' from the notification buttons.
+  void Function(String action)? onRunAction;
+
+  // Same id and channel as geolocator's foreground-service notification, so
+  // this replaces its fixed text instead of adding a second notification.
+  static const _runId = 75415;
+
+  /// Live stats in the running notification, with pause/finish buttons.
+  Future<void> showRun({required String title, required String body, required bool paused}) async {
+    if (!_ready) return;
+    try {
+      await _n.show(
+        _runId,
+        title,
+        body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            'geolocator_channel_01',
+            'تسجيل الجولة',
+            importance: Importance.low,
+            priority: Priority.low,
+            ongoing: true,
+            autoCancel: false,
+            onlyAlertOnce: true,
+            playSound: false,
+            enableVibration: false,
+            showWhen: false,
+            icon: '@mipmap/ic_launcher_monochrome',
+            color: const Color(0xFFF25C2C),
+            category: AndroidNotificationCategory.workout,
+            visibility: NotificationVisibility.public,
+            actions: [
+              AndroidNotificationAction('run_pause', paused ? 'كمّل' : 'إيقاف مؤقت', showsUserInterface: true, cancelNotification: false),
+              const AndroidNotificationAction('run_stop', 'إنهاء', showsUserInterface: true, cancelNotification: false),
+            ],
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint('run notification: $e');
+    }
+  }
+
+  Future<void> cancelRun() async {
+    try {
+      await _n.cancel(_runId);
+    } catch (_) {}
   }
 
   Future<bool> askPermission() async {

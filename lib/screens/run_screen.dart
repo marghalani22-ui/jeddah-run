@@ -7,6 +7,7 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../services/location.dart';
+import '../services/reminders.dart';
 import '../services/run_draft.dart';
 import '../services/voice.dart';
 import '../state/runs.dart';
@@ -63,6 +64,11 @@ class _RunScreenState extends State<RunScreen> with WidgetsBindingObserver {
     WakelockPlus.enable();
     _voice.init();
     WidgetsBinding.instance.addObserver(this);
+    reminders.onRunAction = (a) {
+      if (!mounted || _phase == _Phase.countdown) return;
+      if (a == 'run_pause') _togglePause();
+      if (a == 'run_stop') _finish();
+    };
     final d = widget.resume;
     if (d != null) {
       _startedAt = d.start;
@@ -87,6 +93,9 @@ class _RunScreenState extends State<RunScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    reminders.onRunAction = null;
+    _closed = true;
+    reminders.cancelRun();
     _sub?.cancel();
     _tick?.cancel();
     _voice.stop();
@@ -117,9 +126,23 @@ class _RunScreenState extends State<RunScreen> with WidgetsBindingObserver {
   }
 
   bool _closed = false;
+  int _ticks = 0;
+
+  void _notify() {
+    final km = _meters / 1000, secs = _elapsed;
+    final paused = _phase == _Phase.paused || _phase == _Phase.autoPaused;
+    reminders.showRun(
+      title: '${paused ? '⏸' : '🏃'} ${fmtKm(km)} كم · ${fmtDur(secs)}',
+      body: paused
+          ? (_phase == _Phase.paused ? 'متوقف مؤقتاً' : 'إيقاف تلقائي · تحرّك وتكمّل')
+          : 'السرعة ${fmtPace(km > 0.05 ? secs / km : 0)} /كم · +${kmPoints(km)} نقطة',
+      paused: _phase == _Phase.paused,
+    );
+  }
 
   void _onTick() {
     if (_phase != _Phase.countdown && ++_sinceSave >= 10) _saveDraft();
+    if (_phase != _Phase.countdown && !_closed && ++_ticks % 3 == 0) _notify();
     if (!mounted) return;
     if (_phase == _Phase.countdown) {
       HapticFeedback.heavyImpact();
@@ -227,6 +250,7 @@ class _RunScreenState extends State<RunScreen> with WidgetsBindingObserver {
         _voice.say('توقف مؤقت');
       }
     });
+    _notify();
   }
 
   Future<void> _finish() async {
@@ -254,6 +278,7 @@ class _RunScreenState extends State<RunScreen> with WidgetsBindingObserver {
     _sw.stop();
     _closed = true;
     await _sub?.cancel();
+    reminders.cancelRun();
     if (_meters < 50) {
       await RunDraft.clear();
       if (mounted) Navigator.pop(context);

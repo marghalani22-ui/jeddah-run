@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import '../state/game.dart';
 import '../state/settings.dart';
 import 'health_sync.dart';
+import 'weather.dart';
 
 /// Step counter: the phone's own sensor (read by a background job every
 /// ~15 min, see Steps.kt) plus Health Connect when linked; the higher wins.
@@ -85,7 +86,10 @@ class StepsService extends ChangeNotifier with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState s) {
-    if (s == AppLifecycleState.resumed) refresh();
+    if (s == AppLifecycleState.resumed) {
+      refresh();
+      weather.refresh();
+    }
   }
 
   @override

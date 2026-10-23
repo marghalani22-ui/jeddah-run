@@ -4,6 +4,7 @@ import '../services/social.dart';
 import '../state/runs.dart';
 import '../theme/tokens.dart';
 import '../widgets/friend_avatar.dart';
+import 'friend_profile_screen.dart';
 
 /// One-to-one chat with a friend.
 class ChatScreen extends StatefulWidget {
@@ -133,7 +134,9 @@ class _ChatScreenState extends State<ChatScreen> {
             ],
           ),
         ],
-        title: Row(children: [
+        title: GestureDetector(
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => FriendProfileScreen(uid: widget.otherUid))),
+          child: Row(children: [
           FriendAvatar(name: name, size: 38, ring: (prof?.weekKm ?? 0) > 0),
           const SizedBox(width: Gap.s),
           Expanded(
@@ -145,6 +148,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ]),
           ),
         ]),
+        ),
       ),
       body: Column(children: [
         Divider(height: 1, color: p.edge),

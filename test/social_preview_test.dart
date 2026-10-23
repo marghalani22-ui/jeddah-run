@@ -9,7 +9,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jeddah_run/screens/chat_screen.dart';
+import 'package:jeddah_run/screens/friend_profile_screen.dart';
 import 'package:jeddah_run/screens/friends_screen.dart';
+import 'package:jeddah_run/screens/points_screen.dart';
+import 'package:jeddah_run/services/weather.dart';
+import 'package:jeddah_run/state/game.dart';
+import 'package:jeddah_run/state/runs.dart';
+import 'package:jeddah_run/widgets/weather_widgets.dart';
 import 'package:jeddah_run/services/social.dart';
 import 'package:jeddah_run/theme/tokens.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -41,7 +47,7 @@ void main() {
     final people = {
       'a': {'name': 'سلطان', 'code': 'sultan', 'weekKm': 18.2, 'streak': 9},
       'b': {'name': 'ريم', 'code': 'reem_runs', 'weekKm': 9.6, 'streak': 3},
-      'c': {'name': 'فيصل', 'code': 'faisal', 'weekKm': 21.0, 'streak': 12},
+      'c': {'name': 'فيصل', 'code': 'faisal', 'weekKm': 21.0, 'streak': 12, 'totalKm': 312.4, 'runs': 58, 'level': 9, 'bestStreak': 21, 'longestKm': 15.2, 'badges': ['first', 'k5', 'k10']},
       'd': {'name': 'نورة', 'code': 'noura', 'weekKm': 0, 'streak': 0},
       'e': {'name': 'ماجد', 'code': 'majed99', 'weekKm': 5, 'streak': 1},
     };
@@ -70,6 +76,21 @@ void main() {
         Message('$m', {'from': from, 'text': text, 'at': ago(m)}),
     ];
 
+    // Points history and weather data.
+    final rp = <List<double>>[[21.56, 39.13], [21.57, 39.13]];
+    runStore.runs.addAll([
+      Run(start: now.subtract(const Duration(hours: 2)), secs: 1900, meters: 5320, path: rp, splits: const [360, 355, 350, 362, 349]),
+      Run(start: now.subtract(const Duration(days: 1, hours: 3)), secs: 2600, meters: 7100, path: rp),
+    ]);
+    game.ledger.addAll([
+      LedgerEntry({'id': 's1', 'k': 'streak', 'l': 'مكافأة السلسلة · يوم 4', 'p': 20, 't': now.subtract(const Duration(hours: 2)).millisecondsSinceEpoch}),
+      LedgerEntry({'id': 'c1', 'k': 'challenge', 'l': 'تحدي: 5 كم بجولة وحدة', 'p': 25, 't': now.subtract(const Duration(hours: 2)).millisecondsSinceEpoch}),
+      LedgerEntry({'id': 'st', 'k': 'steps', 'l': 'مهمة الخطوات · 8,000 خطوة', 'p': 20, 't': now.subtract(const Duration(hours: 1)).millisecondsSinceEpoch}),
+      LedgerEntry({'id': 'b1', 'k': 'badge', 'l': 'وسام: أول 5 كم', 'p': 40, 't': now.subtract(const Duration(days: 1, hours: 3)).millisecondsSinceEpoch}),
+    ]);
+    weather.now = HourFeel(now, 38.4, 62, 8);
+    weather.hours = [for (var i = 0; i < 18; i++) HourFeel(now.add(Duration(hours: i)), 38.4 - 9 * (i / 9 - (i > 9 ? (i - 9) / 4.5 : 0)), 60, 0)];
+
     final themes = {'day': (Palette.day, Brightness.light), 'night': (Palette.night, Brightness.dark)};
     for (final MapEntry(key: tn, value: (pal, br)) in themes.entries) {
       ThemeData theme() => ThemeData(
@@ -84,6 +105,9 @@ void main() {
       final cases = <(String, Widget)>[
         ('friends-$tn', const Scaffold(body: FriendsList())),
         ('chat-$tn', ChatScreen(otherUid: 'a', debugMessages: Stream.value(msgs))),
+        ('friend-$tn', const FriendProfileScreen(uid: 'c')),
+        ('points-$tn', const PointsScreen()),
+        ('weather-$tn', const Scaffold(body: SafeArea(child: Column(children: [Padding(padding: EdgeInsets.all(12), child: WeatherPill()), Spacer(), Card(child: WeatherSheet())])))),
       ];
       for (final (name, screen) in cases) {
         final key = GlobalKey();
