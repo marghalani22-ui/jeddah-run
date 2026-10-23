@@ -234,11 +234,21 @@ class _DailyCardState extends State<_DailyCard> {
           Text('آخر ${_days == 7 ? '7 أيام' : '30 يوم'} · المجموع ${fmtKm(total)} كم', style: TextStyle(fontSize: 12.5, color: p.muted)),
           const SizedBox(height: Gap.m),
           SizedBox(height: 130, child: CustomPaint(size: Size.infinite, painter: _DailyBars(km, avg, days, p, DefaultTextStyle.of(context).style.fontFamily))),
-          const SizedBox(height: Gap.m),
+          const SizedBox(height: Gap.xs),
           Row(children: [
+            Container(width: 16, height: 2, color: p.ink.withValues(alpha: .55)),
+            const SizedBox(width: 6),
+            Text('المتوسط ${fmtKm(avg)} كم', style: TextStyle(fontSize: 11.5, color: p.muted)),
+            const SizedBox(width: Gap.m),
+            Container(width: 10, height: 10, decoration: BoxDecoration(gradient: Grad.sunset, borderRadius: BorderRadius.circular(3))),
+            const SizedBox(width: 6),
+            Text('فوق المتوسط', style: TextStyle(fontSize: 11.5, color: p.muted)),
+          ]),
+          const SizedBox(height: Gap.m),
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             _MiniStat(value: '$active/$_days', label: 'أيام جريت'),
-            _MiniStat(value: fmtKm(avgActive), label: 'متوسط يوم الجري'),
-            _MiniStat(value: fmtPace(total > 0 ? secs / total : 0), label: 'متوسط السرعة'),
+            _MiniStat(value: fmtKm(avgActive), label: 'يوم الجري'),
+            _MiniStat(value: fmtPace(total > 0 ? secs / total : 0), label: 'السرعة'),
             _MiniStat(value: fmtKm(best), label: 'أفضل يوم'),
           ]),
         ]),
@@ -306,13 +316,6 @@ class _DailyBars extends CustomPainter {
     for (double x = 0; x < s.width; x += 8) {
       c.drawLine(Offset(x, ay), Offset(math.min(x + 4, s.width), ay), dash);
     }
-    final tp = TextPainter(
-      text: TextSpan(text: 'المتوسط ${avg.toStringAsFixed(1)}', style: TextStyle(fontFamily: font, fontSize: 10, fontWeight: FontWeight.w700, color: p.card)),
-      textDirection: TextDirection.rtl,
-    )..layout();
-    final r = RRect.fromRectAndRadius(Rect.fromLTWH(s.width - tp.width - 10, ay - 9, tp.width + 10, 18), const Radius.circular(9));
-    c.drawRRect(r, Paint()..color = p.ink);
-    tp.paint(c, Offset(s.width - tp.width - 5, ay - tp.height / 2));
   }
 
   void _text(Canvas c, String t, Offset at, Color color, double size) {
