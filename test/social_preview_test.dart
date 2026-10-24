@@ -13,6 +13,7 @@ import 'package:jeddah_run/screens/friend_profile_screen.dart';
 import 'package:jeddah_run/screens/friends_screen.dart';
 import 'package:jeddah_run/screens/log_screen.dart';
 import 'package:jeddah_run/screens/points_screen.dart';
+import 'package:jeddah_run/screens/records_screen.dart';
 import 'package:jeddah_run/services/weather.dart';
 import 'package:jeddah_run/state/game.dart';
 import 'package:jeddah_run/state/runs.dart';
@@ -79,8 +80,8 @@ void main() {
 
     // Points history and weather data.
     final rp = <List<double>>[[21.56, 39.13], [21.57, 39.13]];
-    for (final (d, m, t) in [(2, 4200, 1560), (3, 6100, 2200), (5, 3500, 1300), (6, 8200, 3010), (8, 5000, 1850), (10, 4400, 1610), (12, 6600, 2400), (13, 3000, 1150)]) {
-      runStore.runs.add(Run(start: now.subtract(Duration(days: d, hours: 1)), secs: t, meters: m.toDouble(), path: const []));
+    for (final (d, m, t) in [(9, 10400, 3420), (2, 4200, 1560), (3, 6100, 2200), (5, 3500, 1300), (6, 8200, 3010), (8, 5000, 1850), (10, 4400, 1610), (12, 6600, 2400), (13, 3000, 1150)]) {
+      runStore.runs.add(Run(start: now.subtract(Duration(days: d, hours: 1)), secs: t, meters: m.toDouble(), path: const [], splits: [for (var i = 0; i < m ~/ 1000; i++) (t * 1000 ~/ m) + (i % 3 - 1) * 6]));
     }
     runStore.runs.addAll([
       Run(start: now.subtract(const Duration(hours: 2)), secs: 1900, meters: 5320, path: rp, splits: const [360, 355, 350, 362, 349]),
@@ -93,6 +94,10 @@ void main() {
       LedgerEntry({'id': 'b1', 'k': 'badge', 'l': 'وسام: أول 5 كم', 'p': 40, 't': now.subtract(const Duration(days: 1, hours: 3)).millisecondsSinceEpoch}),
     ]);
     weather.now = HourFeel(now, 38.4, 62, 8);
+    weather.aqi = 168;
+    weather.dust = 240;
+    weather.sunrise = DateTime(now.year, now.month, now.day, 6, 12);
+    weather.sunset = DateTime(now.year, now.month, now.day, 17, 48);
     weather.hours = [for (var i = 0; i < 18; i++) HourFeel(now.add(Duration(hours: i)), 38.4 - 9 * (i / 9 - (i > 9 ? (i - 9) / 4.5 : 0)), 60, 0)];
 
     final themes = {'day': (Palette.day, Brightness.light), 'night': (Palette.night, Brightness.dark)};
@@ -112,6 +117,7 @@ void main() {
         ('friend-$tn', const FriendProfileScreen(uid: 'c')),
         ('points-$tn', const PointsScreen()),
         ('log-$tn', const Scaffold(body: LogScreen())),
+        ('records-$tn', const RecordsScreen()),
         ('weather-$tn', const Scaffold(body: SafeArea(child: Column(children: [Padding(padding: EdgeInsets.all(12), child: WeatherPill()), Spacer(), Card(child: WeatherSheet())])))),
       ];
       for (final (name, screen) in cases) {

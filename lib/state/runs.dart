@@ -24,6 +24,9 @@ class Run {
     this.awarded,
     this.source,
     this.extId,
+    this.kind,
+    this.feel,
+    this.note,
   });
 
   final DateTime start;
@@ -53,6 +56,11 @@ class Run {
   /// Id in the source (Health Connect record id) to avoid importing twice.
   final String? extId;
 
+  /// Runner's own tags: kind (see [runKinds]), feel 1–5, a short note.
+  String? kind;
+  int? feel;
+  String? note;
+
   bool get imported => source != null;
 
   double get km => meters / 1000;
@@ -71,6 +79,9 @@ class Run {
         if (awarded != null) 'a': awarded,
         if (source != null) 'src': source,
         if (extId != null) 'ext': extId,
+        if (kind != null) 'kd': kind,
+        if (feel != null) 'fl': feel,
+        if (note != null) 'nt': note,
       };
 
   factory Run.fromJson(Map<String, dynamic> j) => Run(
@@ -84,8 +95,24 @@ class Run {
         awarded: j['a'] as int?,
         source: j['src'] as String?,
         extId: j['ext'] as String?,
+        kind: j['kd'] as String?,
+        feel: j['fl'] as int?,
+        note: j['nt'] as String?,
       );
 }
+
+/// Run kinds the runner can tag, with labels and icons.
+const runKinds = <String, (String, IconData)>{
+  'easy': ('جري خفيف', Icons.directions_run_rounded),
+  'tempo': ('جري سريع', Icons.speed_rounded),
+  'long': ('جولة طويلة', Icons.route_rounded),
+  'intervals': ('تمرين متقطع', Icons.timer_rounded),
+  'race': ('سباق', Icons.emoji_events_rounded),
+  'walk': ('مشي', Icons.directions_walk_rounded),
+};
+
+const feelFaces = ['😫', '😕', '😐', '🙂', '🤩'];
+const feelNames = ['صعبة جداً', 'تعبانة', 'عادية', 'حلوة', 'نار'];
 
 /// Anti-cheat check run when a run ends. Returns a reason or null.
 String? checkRun({required double meters, required int secs, required int rejected, required int accepted}) {
@@ -141,6 +168,15 @@ class RunStore extends ChangeNotifier {
     notifyListeners();
     await _save();
     onChange?.call(RunChange.removed, r);
+  }
+
+  Future<void> setDetails(Run r, {String? kind, int? feel, String? note}) async {
+    r.kind = kind;
+    r.feel = feel;
+    r.note = (note ?? '').trim().isEmpty ? null : note!.trim();
+    notifyListeners();
+    await _save();
+    onChange?.call(RunChange.updated, r);
   }
 
   Future<void> rename(Run r, String name) async {

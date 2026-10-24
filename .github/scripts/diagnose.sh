@@ -39,6 +39,7 @@ adb emu geo fix $LON $LAT; sleep 2
 adb shell input tap $((SW - SW/10)) $Y; sleep 3                  # map tab
 adb shell input tap $((SW/2)) $((SH*78/100)); sleep 6            # ابدأ جولة + countdown
 walk 8; adb exec-out screencap -p > diag/run-1-running.png
+adb shell input tap 92 64; sleep 1; adb exec-out screencap -p > diag/run-1b-locked.png
 adb shell input keyevent KEYCODE_HOME; sleep 1
 walk 20; adb exec-out screencap -p > diag/run-2-home.png
 adb shell cmd statusbar expand-notifications; sleep 2; adb exec-out screencap -p > diag/run-2b-notification.png; adb shell cmd statusbar collapse

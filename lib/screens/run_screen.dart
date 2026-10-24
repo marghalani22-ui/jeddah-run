@@ -67,7 +67,10 @@ class _RunScreenState extends State<RunScreen> with WidgetsBindingObserver {
     reminders.onRunAction = (a) {
       if (!mounted || _phase == _Phase.countdown) return;
       if (a == 'run_pause') _togglePause();
-      if (a == 'run_stop') _finish();
+      if (a == 'run_stop') {
+        setState(() => _locked = false);
+        _finish();
+      }
     };
     final d = widget.resume;
     if (d != null) {
@@ -126,6 +129,23 @@ class _RunScreenState extends State<RunScreen> with WidgetsBindingObserver {
   }
 
   bool _closed = false;
+  bool _locked = false;
+
+  // (metres, seconds) samples for the current pace over the last ~200 m.
+  final _trail = <(double, int)>[];
+
+  double? get _currentPace {
+    if (_phase != _Phase.running || _trail.length < 2) return null;
+    final (m1, t1) = _trail.last;
+    var i = _trail.length - 1;
+    while (i > 0 && m1 - _trail[i].$1 < 200) {
+      i--;
+    }
+    final (m0, t0) = _trail[i];
+    final dm = m1 - m0;
+    if (dm < 100) return null;
+    return (t1 - t0) / (dm / 1000);
+  }
   int _ticks = 0;
 
   void _notify() {
@@ -196,6 +216,8 @@ class _RunScreenState extends State<RunScreen> with WidgetsBindingObserver {
       }
       _accepted++;
       _meters += d;
+      _trail.add((_meters, _elapsed));
+      if (_trail.length > 400) _trail.removeRange(0, 100);
       _lastMove = DateTime.now();
       _checkSplit();
     } else {
@@ -253,13 +275,14 @@ class _RunScreenState extends State<RunScreen> with WidgetsBindingObserver {
     _notify();
   }
 
-  Future<void> _finish() async {
+  Future<void> _finish({bool confirm = true}) async {
     if (_phase == _Phase.countdown) {
       Navigator.pop(context);
       return;
     }
+    if (_locked) return;
     _saveDraft();
-    final ok = await showDialog<bool>(
+    final ok = !confirm ? true : await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
         title: const Text('تنهي الجولة؟'),
@@ -275,6 +298,9 @@ class _RunScreenState extends State<RunScreen> with WidgetsBindingObserver {
       ),
     );
     if (ok != true || !mounted) return;
+    if (!confirm && _meters < 50 && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الجولة أقل من 50 م، ما انحفظت')));
+    }
     _sw.stop();
     _closed = true;
     await _sub?.cancel();
@@ -330,6 +356,17 @@ class _RunScreenState extends State<RunScreen> with WidgetsBindingObserver {
                     child: Row(children: [
                       _Pill(icon: Icons.gps_fixed, text: 'GPS ${gps.$1}', color: gps.$2),
                       const Spacer(),
+                      IconButton.filledTonal(
+                        onPressed: _phase == _Phase.countdown
+                            ? null
+                            : () {
+                                HapticFeedback.mediumImpact();
+                                setState(() => _locked = true);
+                              },
+                        icon: const Icon(Icons.lock_outline_rounded),
+                        tooltip: 'قفل الشاشة',
+                      ),
+                      const SizedBox(width: Gap.xs),
                       ListenableBuilder(
                         listenable: settings,
                         builder: (_, __) => IconButton.filledTonal(
@@ -366,12 +403,20 @@ class _RunScreenState extends State<RunScreen> with WidgetsBindingObserver {
                           ),
                   ),
                   Text(fmtKm(km), style: const TextStyle(fontSize: 92, fontWeight: FontWeight.w700, height: 1.05, color: Colors.white, letterSpacing: -1)),
-                  const Text('كيلومتر', style: TextStyle(color: Color(0xFFA3AEC6), fontSize: 14)),
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    const Text('كيلومتر', style: TextStyle(color: Color(0xFFA3AEC6), fontSize: 14)),
+                    const SizedBox(width: Gap.s),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(color: const Color(0x33FFB81C), borderRadius: BorderRadius.circular(Radii.chip)),
+                      child: Text('+${kmPoints(km)} نقطة', style: const TextStyle(color: Brand.sun, fontSize: 12.5, fontWeight: FontWeight.w700)),
+                    ),
+                  ]),
                   const SizedBox(height: Gap.l),
                   Row(children: [
                     _Stat(value: fmtDur(secs), label: 'الزمن'),
-                    _Stat(value: fmtPace(km > 0.05 ? secs / km : 0), label: 'لكل كم'),
-                    _Stat(value: '+${kmPoints(km)}', label: 'نقطة', color: Brand.sun),
+                    _Stat(value: fmtPace(_currentPace ?? 0), label: 'السرعة الحالية', color: const Color(0xFF7FE0C2)),
+                    _Stat(value: fmtPace(km > 0.05 ? secs / km : 0), label: 'المتوسط /كم'),
                   ]),
                   if (_splits.isNotEmpty) ...[
                     const SizedBox(height: Gap.m),
@@ -399,6 +444,12 @@ class _RunScreenState extends State<RunScreen> with WidgetsBindingObserver {
                     ),
                   ],
                   const SizedBox(height: Gap.xl),
+                  if (_locked)
+                    _SlideToUnlock(onUnlock: () {
+                      HapticFeedback.mediumImpact();
+                      setState(() => _locked = false);
+                    })
+                  else
                   Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                     _RoundBtn(
                       icon: _phase == _Phase.paused ? Icons.play_arrow_rounded : Icons.pause_rounded,
@@ -408,7 +459,13 @@ class _RunScreenState extends State<RunScreen> with WidgetsBindingObserver {
                       onTap: _phase == _Phase.countdown ? null : _togglePause,
                     ),
                     const SizedBox(width: Gap.xxl),
-                    _RoundBtn(icon: Icons.stop_rounded, label: 'إنهاء', color: Brand.coral, onTap: _finish),
+                    _HoldToFinish(
+                      enabled: _phase != _Phase.countdown,
+                      onDone: () => _finish(confirm: false),
+                      onTap: () => ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(const SnackBar(content: Text('اضغط مطوّل على «إنهاء» عشان تنهي الجولة'), duration: Duration(seconds: 2))),
+                    ),
                   ]),
                 ]),
               ),
@@ -498,4 +555,132 @@ class _RoundBtn extends StatelessWidget {
         const SizedBox(height: 6),
         Text(label, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: Color(0xFFA3AEC6))),
       ]);
+}
+
+/// Finish needs a one-second press: a ring fills while holding.
+class _HoldToFinish extends StatefulWidget {
+  const _HoldToFinish({required this.enabled, required this.onDone, required this.onTap});
+  final bool enabled;
+  final VoidCallback onDone, onTap;
+
+  @override
+  State<_HoldToFinish> createState() => _HoldToFinishState();
+}
+
+class _HoldToFinishState extends State<_HoldToFinish> with SingleTickerProviderStateMixin {
+  late final _a = AnimationController(vsync: this, duration: const Duration(milliseconds: 900))
+    ..addStatusListener((s) {
+      if (s == AnimationStatus.completed) {
+        HapticFeedback.heavyImpact();
+        widget.onDone();
+      }
+    });
+  DateTime? _down;
+
+  @override
+  void dispose() {
+    _a.dispose();
+    super.dispose();
+  }
+
+  void _start() {
+    if (!widget.enabled) return;
+    _down = DateTime.now();
+    HapticFeedback.selectionClick();
+    _a.forward(from: 0);
+  }
+
+  void _stop() {
+    if (_a.isCompleted) return;
+    final quick = _down != null && DateTime.now().difference(_down!).inMilliseconds < 250;
+    _a.reverse();
+    if (quick) widget.onTap();
+  }
+
+  @override
+  Widget build(BuildContext context) => Column(children: [
+        GestureDetector(
+          onTapDown: (_) => _start(),
+          onTapUp: (_) => _stop(),
+          onTapCancel: _stop,
+          child: AnimatedBuilder(
+            animation: _a,
+            builder: (_, __) => SizedBox(
+              width: 80,
+              height: 80,
+              child: Stack(alignment: Alignment.center, children: [
+                Container(
+                  width: 80 - 10 * _a.value,
+                  height: 80 - 10 * _a.value,
+                  decoration: BoxDecoration(color: widget.enabled ? Brand.coral : Brand.coral.withValues(alpha: .4), shape: BoxShape.circle),
+                  child: const Icon(Icons.stop_rounded, color: Colors.white, size: 38),
+                ),
+                SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: CircularProgressIndicator(value: _a.value, strokeWidth: 4, color: Colors.white, backgroundColor: Colors.transparent),
+                ),
+              ]),
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        const Text('اضغط مطوّل للإنهاء', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: Color(0xFFA3AEC6))),
+      ]);
+}
+
+/// Locked controls: drag the knob to the end to unlock.
+class _SlideToUnlock extends StatefulWidget {
+  const _SlideToUnlock({required this.onUnlock});
+  final VoidCallback onUnlock;
+
+  @override
+  State<_SlideToUnlock> createState() => _SlideToUnlockState();
+}
+
+class _SlideToUnlockState extends State<_SlideToUnlock> {
+  double _x = 0;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(builder: (context, c) {
+        const knob = 64.0;
+        final max = c.maxWidth - knob - 8;
+        final rtl = Directionality.of(context) == TextDirection.rtl;
+        return Container(
+          height: 72,
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(color: const Color(0xFF1E2D4F), borderRadius: BorderRadius.circular(36)),
+          child: Stack(children: [
+            Center(
+              child: Opacity(
+                opacity: (1 - _x / max).clamp(0, 1).toDouble(),
+                child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.lock_rounded, color: Color(0xFFA3AEC6), size: 18),
+                  SizedBox(width: 6),
+                  Text('اسحب لفك القفل', style: TextStyle(color: Color(0xFFA3AEC6), fontWeight: FontWeight.w600)),
+                ]),
+              ),
+            ),
+            PositionedDirectional(
+              start: _x,
+              child: GestureDetector(
+                onHorizontalDragUpdate: (d) => setState(() => _x = (_x + (rtl ? -d.delta.dx : d.delta.dx)).clamp(0, max)),
+                onHorizontalDragEnd: (_) {
+                  if (_x > max * .85) {
+                    widget.onUnlock();
+                  } else {
+                    setState(() => _x = 0);
+                  }
+                },
+                child: Container(
+                  width: knob,
+                  height: knob,
+                  decoration: const BoxDecoration(gradient: Grad.sunset, shape: BoxShape.circle),
+                  child: const Icon(Icons.lock_open_rounded, color: Colors.white),
+                ),
+              ),
+            ),
+          ]),
+        );
+      });
 }

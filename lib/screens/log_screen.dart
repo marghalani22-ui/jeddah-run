@@ -41,7 +41,10 @@ class _Log extends StatelessWidget {
         padding: const EdgeInsets.all(Gap.l + 2),
         decoration: BoxDecoration(gradient: Grad.sunset, borderRadius: BorderRadius.circular(26)),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('هذا الأسبوع', style: TextStyle(color: Color(0xE6FFFFFF), fontSize: 13, fontWeight: FontWeight.w500)),
+          Row(children: [
+            const Expanded(child: Text('هذا الأسبوع', style: TextStyle(color: Color(0xE6FFFFFF), fontSize: 13, fontWeight: FontWeight.w500))),
+            const _VsLastWeek(),
+          ]),
           Text.rich(TextSpan(children: [
             TextSpan(text: fmtKm(wkKm), style: const TextStyle(fontSize: 46, fontWeight: FontWeight.w700, color: Colors.white, height: 1.1)),
             const TextSpan(text: ' كم', style: TextStyle(fontSize: 16, color: Color(0xE6FFFFFF))),
@@ -115,9 +118,11 @@ class _RunTile extends StatelessWidget {
     final p = context.pal, r = run;
     return ListTile(
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => SummaryScreen(run: r))),
-                leading: CircleAvatar(backgroundColor: p.sand2, child: const Icon(Icons.route, color: Brand.coral, size: 20)),
+                leading: CircleAvatar(backgroundColor: p.sand2, child: Icon(runKinds[r.kind]?.$2 ?? Icons.route, color: Brand.coral, size: 20)),
                 title: Text(r.title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14.5)),
-                subtitle: Text(r.imported ? '${fmtWhen(r.start)} · ${r.source}' : fmtWhen(r.start), style: TextStyle(color: p.muted, fontSize: 12.5)),
+                subtitle: Text(
+                    '${r.feel != null ? '${feelFaces[r.feel! - 1]} ' : ''}${r.imported ? '${fmtWhen(r.start)} · ${r.source}' : fmtWhen(r.start)}${runKinds[r.kind] != null ? ' · ${runKinds[r.kind]!.$1}' : ''}',
+                    style: TextStyle(color: p.muted, fontSize: 12.5)),
                 trailing: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -328,4 +333,44 @@ class _DailyBars extends CustomPainter {
 
   @override
   bool shouldRepaint(_DailyBars o) => true;
+}
+
+/// "↑ 18% عن الأسبوع الماضي", comparing with last week up to the same point in time.
+class _VsLastWeek extends StatelessWidget {
+  const _VsLastWeek();
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final ws = RunStore.weekStart(now), elapsed = now.difference(ws);
+    final prevStart = ws.subtract(const Duration(days: 7)), prevCut = prevStart.add(elapsed);
+    final prev = runStore.runs
+        .where((r) => r.flag == null && !r.start.isBefore(prevStart) && r.start.isBefore(prevCut))
+        .fold(0.0, (a, r) => a + r.km);
+    final cur = runStore.weekKm;
+    if (prev <= 0 && cur <= 0) return const SizedBox.shrink();
+    final String text;
+    final IconData icon;
+    if (prev <= 0) {
+      text = 'أحسن من الأسبوع الماضي';
+      icon = Icons.trending_up_rounded;
+    } else {
+      final pct = ((cur - prev) / prev * 100).round();
+      icon = pct > 0 ? Icons.trending_up_rounded : (pct < 0 ? Icons.trending_down_rounded : Icons.trending_flat_rounded);
+      text = pct == 0 ? 'نفس الأسبوع الماضي' : '${pct > 0 ? '+' : ''}$pct% عن الأسبوع الماضي';
+    }
+    return Tooltip(
+      message: 'مقارنة بنفس الفترة من الأسبوع الماضي (${fmtKm(prev)} كم)',
+      triggerMode: TooltipTriggerMode.tap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(color: const Color(0x33FFFFFF), borderRadius: BorderRadius.circular(Radii.chip)),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(icon, color: Colors.white, size: 16),
+          const SizedBox(width: 4),
+          Text(text, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
+        ]),
+      ),
+    );
+  }
 }

@@ -30,6 +30,11 @@ class WeatherPill extends StatelessWidget {
                   const SizedBox(width: 5),
                   Text('${n.feels.round()}° ${heatName(n.heat)}', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5, color: c)),
                   if (showBest) Text(' · أفضل ${hourLabel(best.at)}', style: TextStyle(fontSize: 13, color: p.muted, fontWeight: FontWeight.w600)),
+                  if (weather.dusty) ...[
+                    const SizedBox(width: 6),
+                    const Icon(Icons.blur_on_rounded, color: Color(0xFFC08A3E), size: 18),
+                    const Text(' غبار', style: TextStyle(fontSize: 13, color: Color(0xFFC08A3E), fontWeight: FontWeight.w700)),
+                  ],
                 ]),
               ),
             ),
@@ -91,6 +96,22 @@ class WeatherSheet extends StatelessWidget {
             ]),
           ],
           const SizedBox(height: Gap.l),
+          Row(children: [
+            if (weather.sunrise != null) _Tile(icon: Icons.wb_twilight_rounded, color: const Color(0xFFF2A33A), label: 'الشروق', value: clock(weather.sunrise!)),
+            if (weather.sunset != null) _Tile(icon: Icons.nights_stay_rounded, color: Brand.grape, label: 'الغروب', value: clock(weather.sunset!)),
+            if (weather.aqi != null)
+              _Tile(
+                icon: weather.dusty ? Icons.blur_on_rounded : Icons.air_rounded,
+                color: aqiLabel(weather.aqi!).$2,
+                label: weather.dusty ? 'غبار' : 'جودة الهواء',
+                value: aqiLabel(weather.aqi!).$1,
+              ),
+          ]),
+          if (weather.dusty) ...[
+            const SizedBox(height: Gap.s),
+            Text('فيه غبار: الأفضل تجري داخلي اليوم، ولو عندك ربو أو حساسية لا تطلع.', style: TextStyle(color: p.muted, fontSize: 12.5)),
+          ],
+          const SizedBox(height: Gap.l),
           Text('الساعات الجاية', style: TextStyle(fontWeight: FontWeight.w700, color: p.muted, fontSize: 13)),
           const SizedBox(height: Gap.s),
           SizedBox(
@@ -124,7 +145,7 @@ class WeatherSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: Gap.s),
-          Text('المصدر: Open-Meteo · الإحساس الحراري يحسب الحرارة مع الرطوبة', style: TextStyle(fontSize: 11, color: p.muted)),
+          Text('المصدر: Open-Meteo · الإحساس الحراري يحسب الحرارة مع الرطوبة · الشروق والغروب لموقعك', style: TextStyle(fontSize: 11, color: p.muted)),
         ]),
       ),
     );
@@ -134,7 +155,23 @@ class WeatherSheet extends StatelessWidget {
 /// Before a run in dangerous heat: warn, suggest the best time. Returns true to go ahead.
 Future<bool> heatCheck(BuildContext context) async {
   final n = weather.now;
-  if (n == null || n.heat.index < Heat.hot.index) return true;
+  if (n == null) return true;
+  if (n.heat.index < Heat.hot.index) {
+    if (!weather.dusty) return true;
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        icon: const Icon(Icons.blur_on_rounded, color: Color(0xFFC08A3E), size: 40),
+        title: const Text('فيه غبار الحين'),
+        content: const Text('الهواء مو صحي للجري برّا. الأفضل تأجّلها أو تجري داخلي، خصوصاً لو عندك ربو أو حساسية.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('ابدأ على كل حال')),
+          FilledButton(onPressed: () => Navigator.pop(c, false), child: const Text('أأجّلها')),
+        ],
+      ),
+    );
+    return go ?? false;
+  }
   final best = weather.best;
   final go = await showDialog<bool>(
     context: context,
@@ -149,4 +186,28 @@ Future<bool> heatCheck(BuildContext context) async {
     ),
   );
   return go ?? false;
+}
+
+String clock(DateTime d) => '${d.hour % 12 == 0 ? 12 : d.hour % 12}:${d.minute.toString().padLeft(2, '0')} ${d.hour < 12 ? 'ص' : 'م'}';
+
+class _Tile extends StatelessWidget {
+  const _Tile({required this.icon, required this.color, required this.label, required this.value});
+  final IconData icon;
+  final Color color;
+  final String label, value;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+        child: Container(
+          margin: const EdgeInsetsDirectional.only(end: Gap.s),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+          decoration: BoxDecoration(color: context.pal.sand2, borderRadius: BorderRadius.circular(14)),
+          child: Column(children: [
+            Icon(icon, color: color, size: 22),
+            const SizedBox(height: 4),
+            Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, color: context.pal.ink)),
+            Text(label, style: TextStyle(fontSize: 11, color: context.pal.muted)),
+          ]),
+        ),
+      );
 }

@@ -204,6 +204,9 @@ Map<String, dynamic> toCloud(Run r) => {
       'awarded': r.points,
       'source': r.source,
       'extId': r.extId,
+      'kind': r.kind,
+      'feel': r.feel,
+      'note': r.note,
       'savedAt': FieldValue.serverTimestamp(),
     };
 
@@ -220,6 +223,9 @@ Run fromCloud(Map<String, dynamic> j) {
     awarded: (j['awarded'] as num?)?.toInt(),
     source: j['source'] as String?,
     extId: j['extId'] as String?,
+    kind: j['kind'] as String?,
+    feel: (j['feel'] as num?)?.toInt(),
+    note: j['note'] as String?,
   );
 }
 

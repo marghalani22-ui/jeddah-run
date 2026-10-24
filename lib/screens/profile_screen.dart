@@ -4,6 +4,8 @@ import '../services/cloud.dart';
 import '../services/health_sync.dart';
 import '../services/reminders.dart';
 import 'account_screen.dart';
+import 'records_screen.dart';
+import '../state/records.dart';
 import 'connections_screen.dart';
 import '../state/game.dart';
 import '../state/phase.dart';
@@ -41,7 +43,6 @@ class ProfileScreen extends StatelessWidget {
         builder: (context, _) {
           final p = context.pal;
           final name = settings.name.isEmpty ? 'عدّاء' : settings.name;
-          final fast = runStore.fastest, long = runStore.longest;
           return PageBody(title: 'ملفي', children: [
             const _AccountCard(),
             Column(children: [
@@ -83,13 +84,7 @@ class ProfileScreen extends StatelessWidget {
               Kpi(value: '${runStore.runs.length}', label: 'جولة'),
               Kpi(value: '${runStore.bestStreak}', unit: 'يوم', label: 'أطول سلسلة'),
             ]),
-            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              const SectionHead('أرقامك'),
-              KpiCard(children: [
-                Kpi(value: fast == null ? '–' : fmtPace(fast.secPerKm), unit: fast == null ? '' : '/كم', label: 'أسرع متوسط'),
-                Kpi(value: long == null ? '–' : fmtKm(long.km), unit: long == null ? '' : 'كم', label: 'أطول جولة'),
-              ]),
-            ]),
+            const _RecordsTile(),
             Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               const SectionHead('هدفك الأسبوعي'),
               SegmentedButton<int>(
@@ -337,6 +332,50 @@ class _LookPicker extends StatelessWidget {
         tile(Look.sunset, Phase.sunset, 'الغروب'),
         tile(Look.night, Phase.night, 'الليل'),
       ]),
+    ]);
+  }
+}
+
+/// Three headline records with a way into the full list.
+class _RecordsTile extends StatelessWidget {
+  const _RecordsTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.pal, recs = computeRecords(runStore.runs);
+    Widget cell(String id) {
+      final r = recs[id], d = recordDefs.firstWhere((e) => e.id == id);
+      return Expanded(
+        child: Column(children: [
+          Text(r?.display ?? '—', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: p.ink)),
+          Text(d.title, style: TextStyle(fontSize: 12, color: p.muted)),
+        ]),
+      );
+    }
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      const SectionHead('أرقامي القياسية'),
+      Card(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RecordsScreen())),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(Gap.l, Gap.l, Gap.l, Gap.s),
+            child: Column(children: [
+              Row(children: [cell('k1'), cell('k5'), cell('long')]),
+              const SizedBox(height: Gap.s),
+              Divider(height: 1, color: p.edge),
+              Padding(
+                padding: const EdgeInsets.only(top: Gap.s),
+                child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Text('كل الأرقام', style: TextStyle(color: Brand.coral, fontWeight: FontWeight.w700, fontSize: 13.5)),
+                  const Icon(Icons.chevron_left_rounded, color: Brand.coral, size: 20),
+                ]),
+              ),
+            ]),
+          ),
+        ),
+      ),
     ]);
   }
 }

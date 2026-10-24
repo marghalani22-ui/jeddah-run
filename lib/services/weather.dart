@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
+import '../state/phase.dart';
 import '../theme/tokens.dart';
 
 /// How hot it feels, in running terms.
@@ -58,6 +59,15 @@ class Weather extends ChangeNotifier {
   DateTime? _fetched;
   bool _busy = false;
 
+  /// US AQI and dust (µg/m³) from Open-Meteo's air-quality service.
+  int? aqi;
+  double? dust;
+
+  /// Sunrise / sunset for where the runner is.
+  DateTime? sunrise, sunset;
+
+  bool get dusty => (dust ?? 0) >= 150 || (aqi ?? 0) > 150;
+
   /// Coolest hour in the next 24 h — the suggested time to run.
   HourFeel? get best => hours.isEmpty ? null : hours.reduce((a, b) => b.feels < a.feels ? b : a);
 
@@ -104,6 +114,10 @@ class Weather extends ChangeNotifier {
       // UV for "now" comes from the current hour of the hourly series.
       now = HourFeel(DateTime.now(), (c['apparent_temperature'] as num).toDouble(), (c['relative_humidity_2m'] as num?)?.toDouble() ?? 0,
           hours.isEmpty ? 0 : hours.first.uv);
+      final st = sunTimes(DateTime.now(), lat, lon);
+      sunrise = st.$1;
+      sunset = st.$2;
+      await _air(lat, lon);
       _fetched = DateTime.now();
       notifyListeners();
     } catch (e) {
@@ -113,5 +127,39 @@ class Weather extends ChangeNotifier {
     }
   }
 }
+
+extension on Weather {
+  Future<void> _air(double lat, double lon) async {
+    try {
+      final uri = Uri.https('air-quality-api.open-meteo.com', '/v1/air-quality', {
+        'latitude': lat.toStringAsFixed(3),
+        'longitude': lon.toStringAsFixed(3),
+        'current': 'us_aqi,dust',
+        'timezone': 'auto',
+      });
+      final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
+      final res = await (await client.getUrl(uri)).close().timeout(const Duration(seconds: 10));
+      final body = await res.transform(utf8.decoder).join();
+      client.close();
+      if (res.statusCode != 200) return;
+      final c = (jsonDecode(body) as Map<String, dynamic>)['current'] as Map<String, dynamic>;
+      aqi = (c['us_aqi'] as num?)?.round();
+      dust = (c['dust'] as num?)?.toDouble();
+    } catch (e) {
+      debugPrint('air: $e');
+    }
+  }
+}
+
+/// Air quality in words, from the US AQI.
+(String, Color) aqiLabel(int aqi) => aqi <= 50
+    ? ('جيد', Brand.leaf)
+    : aqi <= 100
+        ? ('مقبول', const Color(0xFFE0A92E))
+        : aqi <= 150
+            ? ('غير صحي للحساسين', const Color(0xFFF07A2A))
+            : aqi <= 200
+                ? ('غير صحي', const Color(0xFFD9354A))
+                : ('سيء جداً', const Color(0xFF8E3BC9));
 
 final weather = Weather();
