@@ -1,0 +1,2 @@
+  * ServiceRecord{5df7f2d u0 sa.jeddahrun.jeddah_run/com.baseflow.geolocator.GeolocatorLocationService}
+    isForeground=true foregroundId=75415 types=00000008 foregroundNoti=Notification(channel=geolocator_channel_01 shortcut=null contentView=null vibrate=null sound=null defaults=0x0 flags=0x6a color=0xfff25c2c category=workout actions=2 vis=PUBLIC)

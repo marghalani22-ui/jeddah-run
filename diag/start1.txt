@@ -1,0 +1,7 @@
+Starting: Intent { cmp=sa.jeddahrun.jeddah_run/.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: sa.jeddahrun.jeddah_run/.MainActivity
+TotalTime: 3791
+WaitTime: 3797
+Complete

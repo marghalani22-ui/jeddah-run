@@ -1,0 +1,300 @@
+diag/logcat-first.txt:10-24 07:59:27.065 E/m.android.shell( 3450): Not starting debugger since process cannot load the jdwp agent.
+diag/logcat-first.txt:10-24 07:59:27.138 E/GoogleTagManager( 1783): Invalid macro: _gtm.loadEventEnabled
+diag/logcat-first.txt:10-24 07:59:27.221 E/kuk     ( 1605): Non-success http response code 404 for: https://gstatic.com/webref-ondevice/aiai/19071200_pir/2/en-us/superpacks_manifest.zip
+diag/logcat-first.txt:10-24 07:59:27.449 E/RoleControllerServiceImpl(  837): Default/fallback role holder package doesn't qualify for the role, package: com.google.android.gms.supervision, role: android.app.role.SYSTEM_SUPERVISION
+diag/logcat-first.txt:10-24 07:59:27.450 E/RoleControllerServiceImpl(  837): Default/fallback role holder package doesn't qualify for the role, package: com.google.android.gms, role: android.app.role.SYSTEM_CALL_STREAMING
+diag/logcat-first.txt:10-24 07:59:27.588 E/PhenotypeFlagCommitter( 1430): Retrieving snapshot for com.google.android.gms.playlog.uploader failed
+diag/logcat-first.txt:10-24 07:59:27.588 E/PhenotypeFlagCommitter( 1430): java.util.concurrent.TimeoutException: Timed out waiting for Task
+diag/logcat-first.txt:10-24 07:59:27.588 E/PhenotypeFlagCommitter( 1430): 	at cfsz.o(:com.google.android.gms@231818047@23.18.18 (190800-535401451):6)
+diag/logcat-first.txt:10-24 07:59:27.588 E/PhenotypeFlagCommitter( 1430): 	at bwch.e(:com.google.android.gms@231818047@23.18.18 (190800-535401451):2)
+diag/logcat-first.txt:10-24 07:59:27.588 E/PhenotypeFlagCommitter( 1430): 	at bwch.j(:com.google.android.gms@231818047@23.18.18 (190800-535401451):2)
+diag/logcat-first.txt:10-24 07:59:27.588 E/PhenotypeFlagCommitter( 1430): 	at bwch.h(:com.google.android.gms@231818047@23.18.18 (190800-535401451):0)
+diag/logcat-first.txt:10-24 07:59:27.588 E/PhenotypeFlagCommitter( 1430): 	at com.google.android.gms.clearcut.init.ClearcutInitChimeraIntentService.b(:com.google.android.gms@231818047@23.18.18 (190800-535401451):5)
+diag/logcat-first.txt:10-24 07:59:27.588 E/PhenotypeFlagCommitter( 1430): 	at zdm.onHandleIntent(:com.google.android.gms@231818047@23.18.18 (190800-535401451):8)
+diag/logcat-first.txt:10-24 07:59:27.588 E/PhenotypeFlagCommitter( 1430): 	at com.google.android.chimera.IntentOperation.onHandleIntent(:com.google.android.gms@231818047@23.18.18 (190800-535401451):2)
+diag/logcat-first.txt:10-24 07:59:27.588 E/PhenotypeFlagCommitter( 1430): 	at zhv.onHandleIntent(:com.google.android.gms@231818047@23.18.18 (190800-535401451):4)
+diag/logcat-first.txt:10-24 07:59:27.588 E/PhenotypeFlagCommitter( 1430): 	at hjm.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):3)
+diag/logcat-first.txt:10-24 07:59:27.588 E/PhenotypeFlagCommitter( 1430): 	at hjl.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):11)
+diag/logcat-first.txt:10-24 07:59:27.588 E/PhenotypeFlagCommitter( 1430): 	at dfhf.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):2)
+diag/logcat-first.txt:10-24 07:59:27.588 E/PhenotypeFlagCommitter( 1430): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+diag/logcat-first.txt:10-24 07:59:27.588 E/PhenotypeFlagCommitter( 1430): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+diag/logcat-first.txt:10-24 07:59:27.588 E/PhenotypeFlagCommitter( 1430): 	at java.lang.Thread.run(Thread.java:1012)
+diag/logcat-first.txt:10-24 07:59:27.664 E/GnpSdk  ( 1803): [TargetCreatorHelperImpl] Failed to get android ID.
+diag/logcat-first.txt:10-24 07:59:27.916 E/bwfc    ( 1390): Phenotype API error. Event # edax@92743682, EventCode: 5 [CONTEXT service_id=51 ]
+diag/logcat-first.txt:10-24 07:59:27.916 E/bwfc    ( 1390): bwdx: 29503
+diag/logcat-first.txt:10-24 07:59:27.916 E/bwfc    ( 1390): 	at bwft.a(:com.google.android.gms@231818047@23.18.18 (190800-535401451):4)
+diag/logcat-first.txt:10-24 07:59:27.916 E/bwfc    ( 1390): 	at bwfg.b(:com.google.android.gms@231818047@23.18.18 (190800-535401451):7)
+diag/logcat-first.txt:10-24 07:59:27.916 E/bwfc    ( 1390): 	at bwff.g(:com.google.android.gms@231818047@23.18.18 (190800-535401451):0)
+diag/logcat-first.txt:10-24 07:59:27.916 E/bwfc    ( 1390): 	at bwfc.e(:com.google.android.gms@231818047@23.18.18 (190800-535401451):4)
+diag/logcat-first.txt:10-24 07:59:27.916 E/bwfc    ( 1390): 	at bwfc.f(:com.google.android.gms@231818047@23.18.18 (190800-535401451):2)
+diag/logcat-first.txt:10-24 07:59:27.916 E/bwfc    ( 1390): 	at avsy.eo(:com.google.android.gms@231818047@23.18.18 (190800-535401451):1)
+diag/logcat-first.txt:10-24 07:59:27.916 E/bwfc    ( 1390): 	at avtf.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):14)
+diag/logcat-first.txt:10-24 07:59:27.916 E/bwfc    ( 1390): 	at dfhf.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):2)
+diag/logcat-first.txt:10-24 07:59:27.916 E/bwfc    ( 1390): 	at aced.c(:com.google.android.gms@231818047@23.18.18 (190800-535401451):6)
+diag/logcat-first.txt:10-24 07:59:27.916 E/bwfc    ( 1390): 	at aced.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):8)
+diag/logcat-first.txt:10-24 07:59:27.916 E/bwfc    ( 1390): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+diag/logcat-first.txt:10-24 07:59:27.916 E/bwfc    ( 1390): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+diag/logcat-first.txt:10-24 07:59:27.916 E/bwfc    ( 1390): 	at acjn.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):0)
+diag/logcat-first.txt:10-24 07:59:27.916 E/bwfc    ( 1390): 	at java.lang.Thread.run(Thread.java:1012)
+diag/logcat-first.txt:10-24 07:59:28.073 E/TaskWorkerFactory( 1920): Cannot create worker: com.android.devicelockcontroller.provision.worker.DeviceCheckInWorker
+diag/logcat-first.txt:10-24 07:59:28.073 E/TaskWorkerFactory( 1920): java.lang.NoSuchMethodException: com.android.devicelockcontroller.provision.worker.DeviceCheckInWorker.<init> [class android.content.Context, class androidx.work.WorkerParameters, interface com.google.common.util.concurrent.ListeningExecutorService]
+diag/logcat-first.txt:10-24 07:59:28.073 E/TaskWorkerFactory( 1920): 	at java.lang.Class.getConstructor0(Class.java:3325)
+diag/logcat-first.txt:10-24 07:59:28.073 E/TaskWorkerFactory( 1920): 	at java.lang.Class.getDeclaredConstructor(Class.java:3063)
+diag/logcat-first.txt:10-24 07:59:28.073 E/TaskWorkerFactory( 1920): 	at com.android.devicelockcontroller.policy.TaskWorkerFactory.createWorker(TaskWorkerFactory.java:53)
+diag/logcat-first.txt:10-24 07:59:28.073 E/TaskWorkerFactory( 1920): 	at androidx.work.DelegatingWorkerFactory.createWorker(DelegatingWorkerFactory.java:71)
+diag/logcat-first.txt:10-24 07:59:28.073 E/TaskWorkerFactory( 1920): 	at androidx.work.WorkerFactory.createWorkerWithDefaultFallback(WorkerFactory.java:82)
+diag/logcat-first.txt:10-24 07:59:28.073 E/TaskWorkerFactory( 1920): 	at androidx.work.impl.WorkerWrapper.runWorker(WorkerWrapper.java:240)
+diag/logcat-first.txt:10-24 07:59:28.073 E/TaskWorkerFactory( 1920): 	at androidx.work.impl.WorkerWrapper.run(WorkerWrapper.java:142)
+diag/logcat-first.txt:10-24 07:59:28.073 E/TaskWorkerFactory( 1920): 	at androidx.work.impl.utils.SerialExecutorImpl$Task.run(SerialExecutorImpl.java:96)
+diag/logcat-first.txt:10-24 07:59:28.073 E/TaskWorkerFactory( 1920): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+diag/logcat-first.txt:10-24 07:59:28.073 E/TaskWorkerFactory( 1920): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+diag/logcat-first.txt:10-24 07:59:28.073 E/TaskWorkerFactory( 1920): 	at java.lang.Thread.run(Thread.java:1012)
+diag/logcat-first.txt:10-24 07:59:28.150 E/hrun.jeddah_run( 3559): Not starting debugger since process cannot load the jdwp agent.
+diag/logcat-first.txt:10-24 07:59:28.294 E/d.configupdater( 3550): Not starting debugger since process cannot load the jdwp agent.
+diag/logcat-first.txt:10-24 07:59:28.424 E/AppOps  (  519): attributionTag VCN not declared in manifest of android
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): onError
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): com.google.android.apps.gsa.shared.speech.a.m: errorCode: 65561, engine: 2
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at com.google.android.apps.gsa.staticplugins.dc.a.e.a(PG:3)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at com.google.android.apps.gsa.s3.n.hh(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at com.google.cd.g.a.f.e(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at com.google.android.apps.gsa.speech.k.a.g.d(PG:22)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at com.google.android.apps.gsa.speech.k.a.g.ks(PG:6)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at com.google.android.apps.gsa.s3.o.e(PG:14)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at com.google.android.apps.gsa.s3.p.run(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at com.google.android.apps.gsa.shared.util.c.a.e.run(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at com.google.android.apps.gsa.shared.util.c.a.bi.run(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at com.google.android.apps.gsa.shared.util.c.a.bi.run(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at java.lang.Thread.run(Thread.java:1012)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at com.google.android.apps.gsa.shared.util.c.a.l.run(PG:5)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): Caused by: com.google.android.apps.gsa.shared.speech.a.o: errorCode: 65586, engine: 2
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	... 15 more
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): Caused by: com.google.android.apps.gsa.shared.speech.a.k: errorCode: 401, engine: 2
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at com.google.android.apps.gsa.assistant.shared.n.h.a(PG:5)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at com.google.android.apps.gsa.s3.producers.j.hE(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	at com.google.android.apps.gsa.speech.k.a.g.d(PG:16)
+diag/logcat-first.txt:10-24 07:59:28.436 E/A       ( 1803): 	... 12 more
+diag/logcat-first.txt:10-24 07:59:28.439 E/RoleControllerServiceImpl(  837): Default/fallback role holder package doesn't qualify for the role, package: com.google.android.gms.supervision, role: android.app.role.SYSTEM_SUPERVISION
+diag/logcat-first.txt:10-24 07:59:28.444 E/RoleControllerServiceImpl(  837): Default/fallback role holder package doesn't qualify for the role, package: com.google.android.gms, role: android.app.role.SYSTEM_CALL_STREAMING
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): Exception in upload method
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): com.google.android.apps.gsa.shared.r.d: Error code: 262182
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.apps.gsa.shared.ab.bk.d(PG:5)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.libraries.gsa.c.a.ar.d(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.libraries.gsa.c.a.bo.b(PG:5)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.libraries.gsa.c.a.e.a(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.libraries.gsa.c.a.a.run(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.bf.execute(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.i(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.l(PG:12)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.cancel(PG:8)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.m(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.j.a(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.l(PG:3)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.cancel(PG:8)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.m(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.j.a(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.l(PG:3)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.cancel(PG:8)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.m(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.j.a(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.l(PG:3)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.cancel(PG:8)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.m(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.j.a(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.l(PG:3)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.cancel(PG:8)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.m(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.c.a(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.l(PG:3)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.cancel(PG:8)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.bu.cancel(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.cancel(PG:17)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.apps.gsa.staticplugins.bk.b.h.run(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.bf.execute(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.i(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.l(PG:12)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.cancel(PG:8)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.m(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.j.a(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.l(PG:3)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.cancel(PG:8)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.apps.gsa.shared.util.c.aj.a(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.l(PG:3)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.cancel(PG:8)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.m(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.c.a(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.l(PG:3)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.common.util.concurrent.d.cancel(PG:8)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.apps.gsa.s3.o.c(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.apps.gsa.s3.r.a(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.apps.gsa.staticplugins.dc.a.c.e(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.apps.gsa.staticplugins.dc.a.c.c(PG:3)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.apps.gsa.staticplugins.dc.a.e.a(PG:5)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.apps.gsa.s3.n.hh(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.cd.g.a.f.e(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.apps.gsa.speech.k.a.g.d(PG:22)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.apps.gsa.speech.k.a.g.ks(PG:6)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.apps.gsa.s3.o.e(PG:14)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.apps.gsa.s3.p.run(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.apps.gsa.shared.util.c.a.e.run(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.apps.gsa.shared.util.c.a.bi.run(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.apps.gsa.shared.util.c.a.bi.run(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at java.lang.Thread.run(Thread.java:1012)
+diag/logcat-first.txt:10-24 07:59:28.446 E/cr_CronetUrlRequestContext( 1803): 	at com.google.android.apps.gsa.shared.util.c.a.l.run(PG:5)
+diag/logcat-first.txt:10-24 07:59:28.471 E/tflite  ( 3021): third_party/tensorflow/lite/core/subgraph.cc:903 tensor.data.raw != nullptr was not true.
+diag/logcat-first.txt:10-24 07:59:28.556 E/ConfigUpdater( 3550): ignoring update request
+diag/logcat-first.txt:10-24 07:59:28.558 E/ConfigUpdater( 3550): ignoring update request
+diag/logcat-first.txt:10-24 07:59:28.559 E/ConfigUpdater( 3550): ignoring update request
+diag/logcat-first.txt:10-24 07:59:28.560 E/ConfigUpdater( 3550): ignoring update request
+diag/logcat-first.txt:10-24 07:59:28.561 E/ConfigUpdater( 3550): ignoring update request
+diag/logcat-first.txt:10-24 07:59:28.563 E/ConfigUpdater( 3550): ignoring update request
+diag/logcat-first.txt:10-24 07:59:28.579 E/ConfigUpdater( 3550): ignoring update request
+diag/logcat-first.txt:10-24 07:59:28.580 E/ConfigUpdater( 3550): ignoring update request
+diag/logcat-first.txt:10-24 07:59:28.583 E/ConfigUpdater( 3550): ignoring update request
+diag/logcat-first.txt:10-24 07:59:28.586 E/ConfigUpdater( 3550): ignoring update request
+diag/logcat-first.txt:10-24 07:59:28.587 E/ConfigUpdater( 3550): ignoring update request
+diag/logcat-first.txt:10-24 07:59:28.587 E/ConfigUpdater( 3550): ignoring update request
+diag/logcat-first.txt:10-24 07:59:28.601 E/ActivityManager(  519): Unable to freeze binder for 2437: -11
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): No service published for: ethernet
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): android.os.ServiceManager$ServiceNotFoundException: No service published for: ethernet
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at android.os.ServiceManager.getServiceOrThrow(ServiceManager.java:166)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at android.app.SystemServiceRegistry$139.createService(SystemServiceRegistry.java:1872)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at android.app.SystemServiceRegistry$CachedServiceFetcher.getService(SystemServiceRegistry.java:1971)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at android.app.SystemServiceRegistry.getSystemService(SystemServiceRegistry.java:1645)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at android.app.ContextImpl.getSystemService(ContextImpl.java:2212)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at android.content.ContextWrapper.getSystemService(ContextWrapper.java:934)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at com.android.networkstack.tethering.Tethering.isEthernetSupported(Tethering.java:1582)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at com.android.networkstack.tethering.Tethering.makeSupportedDownstreams(Tethering.java:2550)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at com.android.networkstack.tethering.Tethering.updateSupportedDownstreams(Tethering.java:2524)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at com.android.networkstack.tethering.Tethering.updateConfiguration(Tethering.java:546)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at com.android.networkstack.tethering.Tethering.lambda$new$3(Tethering.java:345)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at com.android.networkstack.tethering.Tethering.$r8$lambda$bts3FsOwVdwDhrwMjvAr9kV3Jgs(Tethering.java:0)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at com.android.networkstack.tethering.Tethering$$ExternalSyntheticLambda7.accept(R8$$SyntheticClass:0)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at com.android.networkstack.tethering.util.VersionedBroadcastListener$Receiver.onReceive(VersionedBroadcastListener.java:103)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at android.app.LoadedApk$ReceiverDispatcher$Args.lambda$getRunnable$0(LoadedApk.java:1802)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at android.app.LoadedApk$ReceiverDispatcher$Args.$r8$lambda$gDuJqgxY6Zb-ifyeubKeivTLAwk(Unknown Source:0)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at android.app.LoadedApk$ReceiverDispatcher$Args$$ExternalSyntheticLambda0.run(Unknown Source:2)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at android.os.Handler.handleCallback(Handler.java:958)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at android.os.Handler.dispatchMessage(Handler.java:99)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at android.os.Looper.loopOnce(Looper.java:205)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at android.os.Looper.loop(Looper.java:294)
+diag/logcat-first.txt:10-24 07:59:28.727 E/SystemServiceRegistry(  999): 	at android.os.HandlerThread.run(HandlerThread.java:67)
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): Retrieving snapshot for com.google.android.dialer failed
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): java.util.concurrent.TimeoutException: Timed out waiting for Task
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): 	at ofh.O(PG:7)
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): 	at nwm.d(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): 	at nwm.c(PG:2)
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): 	at nwm.c(PG:12)
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): 	at htv.call(PG:66)
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): 	at svs.call(PG:7)
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): 	at syd.a(Unknown Source:2)
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): 	at sxh.run(PG:3)
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): 	at sye.run(Unknown Source:4)
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): 	at ocg.run(PG:1)
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): 	at oca.run(PG:19)
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): 	at nxu.run(PG:53)
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): 	at java.lang.Thread.run(Thread.java:1012)
+diag/logcat-first.txt:10-24 07:59:28.772 E/PhenotypeFlagCommitter( 2605): 	at ocj.run(PG:6)
+diag/logcat-first.txt:10-24 07:59:29.201 I/flutter ( 3559): [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(104)] Using the Impeller rendering backend (OpenGLES).
+diag/logcat-first.txt:10-24 07:59:29.370 E/IPCThreadState( 1390): Binder transaction failure: 128867/29189/-22
+diag/logcat-first.txt:10-24 07:59:29.372 E/bwfc    ( 1390): Phenotype API error. Event # edax@8ef1cf44, EventCode: 32 [CONTEXT service_id=51 ]
+diag/logcat-first.txt:10-24 07:59:29.372 E/bwfc    ( 1390): bwdx: 29503
+diag/logcat-first.txt:10-24 07:59:29.372 E/bwfc    ( 1390): 	at bwgv.g(:com.google.android.gms@231818047@23.18.18 (190800-535401451):6)
+diag/logcat-first.txt:10-24 07:59:29.372 E/bwfc    ( 1390): 	at bwfc.e(:com.google.android.gms@231818047@23.18.18 (190800-535401451):4)
+diag/logcat-first.txt:10-24 07:59:29.372 E/bwfc    ( 1390): 	at bwfc.f(:com.google.android.gms@231818047@23.18.18 (190800-535401451):2)
+diag/logcat-first.txt:10-24 07:59:29.372 E/bwfc    ( 1390): 	at avsy.eo(:com.google.android.gms@231818047@23.18.18 (190800-535401451):1)
+diag/logcat-first.txt:10-24 07:59:29.372 E/bwfc    ( 1390): 	at avtf.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):14)
+diag/logcat-first.txt:10-24 07:59:29.372 E/bwfc    ( 1390): 	at dfhf.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):2)
+diag/logcat-first.txt:10-24 07:59:29.372 E/bwfc    ( 1390): 	at aced.c(:com.google.android.gms@231818047@23.18.18 (190800-535401451):6)
+diag/logcat-first.txt:10-24 07:59:29.372 E/bwfc    ( 1390): 	at aced.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):8)
+diag/logcat-first.txt:10-24 07:59:29.372 E/bwfc    ( 1390): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+diag/logcat-first.txt:10-24 07:59:29.372 E/bwfc    ( 1390): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+diag/logcat-first.txt:10-24 07:59:29.372 E/bwfc    ( 1390): 	at acjn.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):0)
+diag/logcat-first.txt:10-24 07:59:29.372 E/bwfc    ( 1390): 	at java.lang.Thread.run(Thread.java:1012)
+diag/logcat-first.txt:10-24 07:59:29.376 E/IPCThreadState( 1390): Binder transaction failure: 129018/29189/-22
+diag/logcat-first.txt:10-24 07:59:29.376 E/bwfc    ( 1390): Phenotype API error. Event # edax@a37321a3, EventCode: 32 [CONTEXT service_id=51 ]
+diag/logcat-first.txt:10-24 07:59:29.376 E/bwfc    ( 1390): bwdx: 29503
+diag/logcat-first.txt:10-24 07:59:29.376 E/bwfc    ( 1390): 	at bwgv.g(:com.google.android.gms@231818047@23.18.18 (190800-535401451):6)
+diag/logcat-first.txt:10-24 07:59:29.376 E/bwfc    ( 1390): 	at bwfc.e(:com.google.android.gms@231818047@23.18.18 (190800-535401451):4)
+diag/logcat-first.txt:10-24 07:59:29.376 E/bwfc    ( 1390): 	at bwfc.f(:com.google.android.gms@231818047@23.18.18 (190800-535401451):2)
+diag/logcat-first.txt:10-24 07:59:29.376 E/bwfc    ( 1390): 	at avsy.eo(:com.google.android.gms@231818047@23.18.18 (190800-535401451):1)
+diag/logcat-first.txt:10-24 07:59:29.376 E/bwfc    ( 1390): 	at avtf.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):14)
+diag/logcat-first.txt:10-24 07:59:29.376 E/bwfc    ( 1390): 	at dfhf.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):2)
+diag/logcat-first.txt:10-24 07:59:29.376 E/bwfc    ( 1390): 	at aced.c(:com.google.android.gms@231818047@23.18.18 (190800-535401451):6)
+diag/logcat-first.txt:10-24 07:59:29.376 E/bwfc    ( 1390): 	at aced.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):8)
+diag/logcat-first.txt:10-24 07:59:29.376 E/bwfc    ( 1390): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+diag/logcat-first.txt:10-24 07:59:29.376 E/bwfc    ( 1390): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:644)
+diag/logcat-first.txt:10-24 07:59:29.376 E/bwfc    ( 1390): 	at acjn.run(:com.google.android.gms@231818047@23.18.18 (190800-535401451):0)
+diag/logcat-first.txt:10-24 07:59:29.376 E/bwfc    ( 1390): 	at java.lang.Thread.run(Thread.java:1012)
+diag/logcat-first.txt:10-24 07:59:29.387 E/IPCThreadState( 1390): Binder transaction failure: 129080/29189/-22
+diag/logcat-first.txt:10-24 07:59:29.422 I/Choreographer( 3559): Skipped 48 frames!  The application may be doing too much work on its main thread.
+diag/logcat-first.txt:10-24 07:59:29.449 E/PeriodStatsTracker( 1390): Reference counting corrupted in usage statistics.
+diag/logcat-first.txt:10-24 07:59:29.470 E/RoleControllerServiceImpl(  837): Default/fallback role holder package doesn't qualify for the role, package: com.google.android.gms.supervision, role: android.app.role.SYSTEM_SUPERVISION
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): [GoogleAccountDataServiceImpl] getToken() -> BAD_AUTHENTICATION. App: com.google.android.gms, Service: oauth2:https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/account.capabilities https://www.googleapis.com/auth/account.service_flags
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): abcp: Long live credential not available.
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at mbt.a(:com.google.android.gms@231818047@23.18.18 (190800-535401451):8)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at mca.b(:com.google.android.gms@231818047@23.18.18 (190800-535401451):3)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at lzx.m(:com.google.android.gms@231818047@23.18.18 (190800-535401451):48)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at lyz.a(:com.google.android.gms@231818047@23.18.18 (190800-535401451):22)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at lze.a(:com.google.android.gms@231818047@23.18.18 (190800-535401451):2)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at mcs.b(:com.google.android.gms@231818047@23.18.18 (190800-535401451):3)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at mcs.a(:com.google.android.gms@231818047@23.18.18 (190800-535401451):6)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at lye.hasFeatures(:com.google.android.gms@231818047@23.18.18 (190800-535401451):2)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at android.accounts.AbstractAccountAuthenticator$Transport.hasFeatures(AbstractAccountAuthenticator.java:324)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at android.accounts.IAccountAuthenticator$Stub.onTransact(IAccountAuthenticator.java:299)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at android.os.Binder.transact(Binder.java:1183)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at aumo.onTransact(:com.google.android.gms@231818047@23.18.18 (190800-535401451):1)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at android.os.Binder.transact(Binder.java:1183)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at aoey.onTransact(:com.google.android.gms@231818047@23.18.18 (190800-535401451):22)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at android.os.Binder.execTransactInternal(Binder.java:1344)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at android.os.Binder.execTransact(Binder.java:1275)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): Message is Long live credential not available.
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): abcp: Long live credential not available.
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at mbt.a(:com.google.android.gms@231818047@23.18.18 (190800-535401451):8)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at mca.b(:com.google.android.gms@231818047@23.18.18 (190800-535401451):3)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at lzx.m(:com.google.android.gms@231818047@23.18.18 (190800-535401451):48)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at lyz.a(:com.google.android.gms@231818047@23.18.18 (190800-535401451):22)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at lze.a(:com.google.android.gms@231818047@23.18.18 (190800-535401451):2)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at mcs.b(:com.google.android.gms@231818047@23.18.18 (190800-535401451):3)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at mcs.a(:com.google.android.gms@231818047@23.18.18 (190800-535401451):6)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at lye.hasFeatures(:com.google.android.gms@231818047@23.18.18 (190800-535401451):2)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at android.accounts.AbstractAccountAuthenticator$Transport.hasFeatures(AbstractAccountAuthenticator.java:324)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at android.accounts.IAccountAuthenticator$Stub.onTransact(IAccountAuthenticator.java:299)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at android.os.Binder.transact(Binder.java:1183)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at aumo.onTransact(:com.google.android.gms@231818047@23.18.18 (190800-535401451):1)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at android.os.Binder.transact(Binder.java:1183)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at aoey.onTransact(:com.google.android.gms@231818047@23.18.18 (190800-535401451):22)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at android.os.Binder.execTransactInternal(Binder.java:1344)
+diag/logcat-first.txt:10-24 07:59:29.487 E/AuthPII ( 1390): 	at android.os.Binder.execTransact(Binder.java:1275)
+diag/logcat-first.txt:10-24 07:59:29.501 E/RoleControllerServiceImpl(  837): Default/fallback role holder package doesn't qualify for the role, package: com.google.android.gms, role: android.app.role.SYSTEM_CALL_STREAMING
+diag/logcat-first.txt:10-24 07:59:29.624 E/android.rkpdapp( 3733): Not starting debugger since process cannot load the jdwp agent.
+diag/logcat-first.txt:10-24 07:59:29.649 E/PackageManager(  519): Optimistic bind failed.
+diag/logcat-first.txt:10-24 07:59:29.649 E/PackageManager(  519): java.util.concurrent.TimeoutException: [Optimistic Bind] Didn't bind to resolver in time!
+diag/logcat-first.txt:10-24 07:59:29.649 E/PackageManager(  519): 	at com.android.server.pm.InstantAppResolverConnection.waitForBindLocked(InstantAppResolverConnection.java:160)
+diag/logcat-first.txt:10-24 07:59:29.649 E/PackageManager(  519): 	at com.android.server.pm.InstantAppResolverConnection.bind(InstantAppResolverConnection.java:225)
+diag/logcat-first.txt:10-24 07:59:29.649 E/PackageManager(  519): 	at com.android.server.pm.InstantAppResolverConnection.lambda$optimisticBind$0(InstantAppResolverConnection.java:255)
+diag/logcat-first.txt:10-24 07:59:29.649 E/PackageManager(  519): 	at com.android.server.pm.InstantAppResolverConnection.$r8$lambda$kGQeuNdbvFwGn-CghEuSr5znX00(InstantAppResolverConnection.java:0)
+diag/logcat-first.txt:10-24 07:59:29.649 E/PackageManager(  519): 	at com.android.server.pm.InstantAppResolverConnection$$ExternalSyntheticLambda0.run(R8$$SyntheticClass:0)
+diag/logcat-first.txt:10-24 07:59:29.649 E/PackageManager(  519): 	at android.os.Handler.handleCallback(Handler.java:958)
+diag/logcat-first.txt:10-24 07:59:29.649 E/PackageManager(  519): 	at android.os.Handler.dispatchMessage(Handler.java:99)
+diag/logcat-first.txt:10-24 07:59:29.649 E/PackageManager(  519): 	at android.os.Looper.loopOnce(Looper.java:205)
+diag/logcat-first.txt:10-24 07:59:29.649 E/PackageManager(  519): 	at android.os.Looper.loop(Looper.java:294)
+diag/logcat-first.txt:10-24 07:59:29.649 E/PackageManager(  519): 	at android.os.HandlerThread.run(HandlerThread.java:67)
+diag/logcat-first.txt:10-24 07:59:29.715 E/IPCThreadState( 1390): Binder transaction failure: 128705/29189/-22
+diag/logcat-first.txt:10-24 07:59:29.734 E/gs.intelligence( 3759): Not starting debugger since process cannot load the jdwp agent.
+diag/logcat-first.txt:10-24 07:59:29.854 E/AppOps  (  519): attributionTag VCN not declared in manifest of android
+diag/logcat-first.txt:10-24 07:59:29.887 E/AppOps  (  519): attributionTag VCN not declared in manifest of android
+diag/logcat-first.txt:10-24 07:59:29.998 E/ActivityManager(  519): Unable to freeze binder for 3759: -11
+diag/logcat-first.txt:10-24 07:59:30.033 E/IPCThreadState( 1390): Binder transaction failure: 134881/29189/-22
+diag/logcat-first.txt:10-24 07:59:30.111 E/DrmHalHidl( 3733): Failed to find passthrough drm factories
+diag/logcat-first.txt:10-24 07:59:30.156 E/WakeLock( 1390): GCM_HB_ALARM release without a matched acquire!
+diag/logcat-first.txt:10-24 07:59:30.185 E/WVCdm   (  395): [oemcrypto_adapter_dynamic.cpp(1337):ValidateOrInstallL1KeyboxOrCert] L1 not initialized. Falling back to L3
